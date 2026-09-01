@@ -38,14 +38,3 @@
   font-display: swap;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-:root {
-  font-family: "Inter Display", sans-serif;
-  --black: #000000;
-  --white: #ffffff;
-}

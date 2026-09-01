@@ -1,3 +1,14 @@
+import styles from "./app.module.css";
+import { PreviewCanvas } from "./features/preview/preview-canvas";
+
 export default function App() {
-  return <div>Welcome to Wispr! Let this be something incredible.</div>;
+  return (
+    <div className={styles.layout}>
+      <div className={styles.topbar}>Wisp</div>
+      <div className={styles.preview}>
+        <PreviewCanvas />
+      </div>
+      <div className={styles.timeline} />
+    </div>
+  );
 }
