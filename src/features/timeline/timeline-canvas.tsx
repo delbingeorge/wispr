@@ -54,6 +54,13 @@ export function TimelineCanvas() {
           scrollX: useTimelineStore.getState().scrollX,
           currentTime: usePlaybackStore.getState().currentTime,
           tracks: useProjectStore.getState().project.tracks,
+          clips: useProjectStore.getState().clips,
+          assetNames: useProjectStore
+            .getState()
+            .project.assets.reduce<Record<string, string>>(
+              (acc, asset) => ({ ...acc, [asset.id]: asset.name }),
+              {},
+            ),
           width: rect.width,
           height: rect.height,
         });

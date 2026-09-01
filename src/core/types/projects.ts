@@ -46,6 +46,17 @@ type Project = {
   updatedAt: number;
 };
 
+type MediaClip = {
+  id: string;
+  trackId: string;
+  assetId: string;
+  kind: "media";
+  startTime: number;
+  duration: number;
+  inPoint: number;
+  outPoint: number;
+};
+
 export type {
   Resolution,
   MediaMetadata,
@@ -54,4 +65,5 @@ export type {
   Track,
   Project,
   Asset,
+  MediaClip,
 };
