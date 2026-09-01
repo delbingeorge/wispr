@@ -6,7 +6,7 @@ type Resolution = {
 type MediaMetadata = {
   width: number;
   height: number;
-  codec: number;
+  codec: string;
   sampleRate?: number;
   channelCount?: number;
 };
@@ -46,4 +46,12 @@ type Project = {
   updatedAt: number;
 };
 
-export type { Resolution, MediaMetadata, AssetType, TrackType, Track, Project, Asset};
+export type {
+  Resolution,
+  MediaMetadata,
+  AssetType,
+  TrackType,
+  Track,
+  Project,
+  Asset,
+};

@@ -21,7 +21,7 @@ export function extractMetadata(file: File): Promise<VideoMetadata> {
       }
 
       resolve({
-        width: videoTrack.video.height,
+        width: videoTrack.video.width,
         height: videoTrack.video.height,
         codec: videoTrack.codec,
         duration: videoTrack.duration / videoTrack.timescale,
