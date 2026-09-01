@@ -1,5 +1,6 @@
 import styles from "./app.module.css";
 import { PreviewCanvas } from "./features/preview/preview-canvas";
+import { TimelineCanvas } from "./features/timeline/timeline-canvas";
 
 export default function App() {
   return (
@@ -8,7 +9,9 @@ export default function App() {
       <div className={styles.preview}>
         <PreviewCanvas />
       </div>
-      <div className={styles.timeline} />
+      <div className={styles.timeline}>
+        <TimelineCanvas />
+      </div>
     </div>
   );
 }
