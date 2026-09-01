@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useProjectStore } from "../../core/stores/project-store";
 import { readFileFromOpfs } from "../../core/storage/opfs-storage";
+import { AssetImporter } from "../../features/assets/asset-importer";
 
 export function PreviewCanvas() {
   const assets = useProjectStore((s) => s.project.assets);
@@ -27,6 +28,8 @@ export function PreviewCanvas() {
       }
     };
   }, [latestAsset?.id]);
+
+  if (!latestAsset) return <AssetImporter />;
 
   return <video ref={videoRef} src={videoUrl ?? undefined} controls />;
 }
