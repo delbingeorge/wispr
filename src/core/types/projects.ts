@@ -46,4 +46,4 @@ type Project = {
   updatedAt: number;
 };
 
-export type { Resolution, MediaMetadata, AssetType, TrackType, Track, Project };
+export type { Resolution, MediaMetadata, AssetType, TrackType, Track, Project, Asset};
