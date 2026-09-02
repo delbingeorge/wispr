@@ -19,6 +19,7 @@ type RenderData = {
   assetNames: Record<string, string>;
   width: number;
   height: number;
+  getThumbnail: (assetId: string, timestamp: number) => ImageBitmap | null;
 };
 
 export class TimelineRenderer {
@@ -58,9 +59,16 @@ export class TimelineRenderer {
         const y = trackY + CLIP_MARGIN;
         const height = TRACK_HEIGHT - CLIP_MARGIN * 2;
 
-        ctx.fillStyle = "#3a5a3a";
+        ctx.save();
         this.roundRect(ctx, x, y, width, height, CLIP_RADIUS);
-        ctx.fill();
+        ctx.clip();
+
+        ctx.fillStyle = "#3a5a3a";
+        ctx.fillRect(x, y, width, height);
+
+        this.renderThumbnails(ctx, clip, data, x, y, width, height);
+
+        ctx.restore();
 
         ctx.strokeStyle = "#4a7a4a";
         ctx.lineWidth = 1;
@@ -83,6 +91,29 @@ export class TimelineRenderer {
           ctx.fillText(name, x + textPadding, y + height / 2);
           ctx.restore();
         }
+      }
+    }
+  }
+
+  private renderThumbnails(
+    ctx: CanvasRenderingContext2D,
+    clip: MediaClip,
+    data: RenderData,
+    clipX: number,
+    clipY: number,
+    clipWidth: number,
+    clipHeight: number,
+  ) {
+    const thumbWidth = (clipHeight / 9) * 16;
+    const thumbCount = Math.ceil(clipWidth / thumbWidth);
+
+    for (let i = 0; i < thumbCount; i++) {
+      const drawX = clipX + i * thumbWidth;
+      const sourceTime = clip.inPoint + (i / thumbCount) * clip.duration;
+
+      const bitmap = data.getThumbnail(clip.assetId, sourceTime);
+      if (bitmap) {
+        ctx.drawImage(bitmap, drawX, clipY, thumbWidth, clipHeight);
       }
     }
   }

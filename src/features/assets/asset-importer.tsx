@@ -1,14 +1,20 @@
 import { useCallback, useRef } from "react";
+import { useProjectStore } from "../../core/stores/project-store.ts";
+import { usePlaybackStore } from "../../core/stores/playback-store.ts";
+import { extractMetadata } from "../../core/webcodecs/demuxer";
 import { storeFileInOpfs } from "../../core/storage/opfs-storage";
 import { generateId } from "../../core/utils/id-generator";
-import { useProjectStore } from "../../core/stores/project-store";
-import { extractMetadata } from "../../core/webcodecs/demuxer";
+import { generateThumbnails } from "../../core/webcodecs/thumbnail-generator.ts";
 
 export function AssetImporter() {
   const addAsset = useProjectStore((s) => s.addAsset);
   const addClip = useProjectStore((s) => s.addClip);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dirtyTimeline = useCallback(() => {
+    usePlaybackStore
+      .getState()
+      .setCurrentTime(usePlaybackStore.getState().currentTime);
+  }, []);
 
   const handleFile = useCallback(
     async (file: File) => {
@@ -16,8 +22,6 @@ export function AssetImporter() {
       const opfsPath = `${assetId}-${file.name}`;
 
       const metadata = await extractMetadata(file);
-      console.log(metadata);
-
       await storeFileInOpfs(file, opfsPath);
 
       addAsset({
@@ -34,15 +38,14 @@ export function AssetImporter() {
           codec: metadata.codec,
         },
       });
+
       const { project, clips } = useProjectStore.getState();
       const videoTrack = project.tracks.find((t) => t.type === "video");
-
       if (!videoTrack) return;
 
       const existingClips = Object.values(clips).filter(
         (c) => c.trackId === videoTrack.id,
       );
-
       const startTime = existingClips.reduce(
         (max, c) => Math.max(max, c.startTime + c.duration),
         0,
@@ -58,8 +61,16 @@ export function AssetImporter() {
         inPoint: 0,
         outPoint: metadata.duration,
       });
+
+      const thumbnailCount = Math.max(1, Math.ceil(metadata.duration / 2));
+      const timestamps = Array.from(
+        { length: thumbnailCount },
+        (_, i) => (i / thumbnailCount) * metadata.duration,
+      );
+
+      generateThumbnails(assetId, opfsPath, timestamps, 160, 90, dirtyTimeline);
     },
-    [addAsset, addClip],
+    [addAsset, addClip, dirtyTimeline],
   );
 
   const handleDrop = useCallback(

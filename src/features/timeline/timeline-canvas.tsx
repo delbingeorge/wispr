@@ -4,6 +4,7 @@ import { usePlaybackStore } from "../../core/stores/playback-store";
 import { useTimelineStore } from "../../core/stores/timeline-store";
 import { pixelToTime } from "../../core/utils/time-coordinate";
 import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
+import { getThumbnail } from "../../core/webcodecs/thumbnail-generator";
 
 const renderer = new TimelineRenderer();
 
@@ -61,6 +62,7 @@ export function TimelineCanvas() {
               (acc, asset) => ({ ...acc, [asset.id]: asset.name }),
               {},
             ),
+          getThumbnail,
           width: rect.width,
           height: rect.height,
         });
