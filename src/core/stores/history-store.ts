@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Command } from "../commands/types";
+import type { Command } from "@/core/commands/types";
 
 type HistoryState = {
   undoStack: Command[];

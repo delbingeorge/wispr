@@ -1,6 +1,6 @@
-import type { Command } from "./types";
-import type { MediaClip } from "../types/projects";
-import { useProjectStore } from "../stores/project-store";
+import type { Command } from "@/core/commands/types";
+import type { MediaClip } from "@/core/types/projects";
+import { useProjectStore } from "@/core/stores/project-store";
 
 export function createMoveCommand(
   clipId: string,

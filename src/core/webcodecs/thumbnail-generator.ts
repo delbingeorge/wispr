@@ -1,4 +1,4 @@
-import { gc } from "../../core/utils/logger";
+import { gc } from "@/core/utils/logger";
 
 type ThumbnailCache = Map<string, ImageBitmap>;
 

@@ -1,5 +1,5 @@
 import { createFile, type MP4ArrayBuffer, type MP4Info } from "mp4box";
-import { gc } from "../../core/utils/logger";
+import { gc } from "@/core/utils/logger";
 
 type VideoMetadata = {
   width: number;

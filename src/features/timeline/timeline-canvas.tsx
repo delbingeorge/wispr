@@ -1,18 +1,18 @@
 import { useRef, useEffect, useCallback } from "react";
-import { useProjectStore } from "../../core/stores/project-store";
-import { usePlaybackStore } from "../../core/stores/playback-store";
-import { useTimelineStore } from "../../core/stores/timeline-store";
-import { useSelectionStore } from "../../core/stores/selection-store";
-import { pixelToTime } from "../../core/utils/time-coordinate";
+import { useProjectStore } from "@/core/stores/project-store";
+import { usePlaybackStore } from "@/core/stores/playback-store";
+import { useTimelineStore } from "@/core/stores/timeline-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
+import { pixelToTime } from "@/core/utils/time-coordinate";
 import { hitTest } from "./hit-test";
-import { getThumbnail } from "../../core/webcodecs/thumbnail-generator";
+import { getThumbnail } from "@/core/webcodecs/thumbnail-generator";
 import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
 import { findSnapTarget } from "./snap-system";
-import { useHistoryStore } from "../../core/stores/history-store";
+import { useHistoryStore } from "@/core/stores/history-store";
 import {
   createMoveCommand,
   createTrimCommand,
-} from "../../core/commands/clip-commands";
+} from "@/core/commands/clip-commands";
 
 const renderer = new TimelineRenderer();
 

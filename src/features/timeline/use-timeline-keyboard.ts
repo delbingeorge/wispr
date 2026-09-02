@@ -1,13 +1,13 @@
 import { useEffect } from "react";
-import { useSelectionStore } from "../../core/stores/selection-store";
-import { usePlaybackStore } from "../../core/stores/playback-store";
-import { useProjectStore } from "../../core/stores/project-store";
-import { useHistoryStore } from "../../core/stores/history-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
+import { usePlaybackStore } from "@/core/stores/playback-store";
+import { useProjectStore } from "@/core/stores/project-store";
+import { useHistoryStore } from "@/core/stores/history-store";
 import {
   createSplitCommand,
   createDeleteCommand,
-} from "../../core/commands/clip-commands";
-import { gc } from "../../core/utils/logger";
+} from "@/core/commands/clip-commands";
+import { gc } from "@/core/utils/logger";
 
 export function useTimelineKeyboard() {
   useEffect(() => {

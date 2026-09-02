@@ -1,5 +1,5 @@
-import type { MediaClip } from "../../core/types/projects";
-import { gc } from "../../core/utils/logger";
+import type { MediaClip } from "@/core/types/projects";
+import { gc } from "@/core/utils/logger";
 
 const SNAP_THRESHOLD_PX = 8;
 

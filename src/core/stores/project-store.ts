@@ -1,6 +1,6 @@
 import { create } from "zustand";
-import type { Project, Asset, MediaClip } from "../types/projects";
-import { generateId } from "../utils/id-generator";
+import type { Project, Asset, MediaClip } from "@/core/types/projects";
+import { generateId } from "@/core/utils/id-generator";
 
 type ProjectState = {
   project: Project;

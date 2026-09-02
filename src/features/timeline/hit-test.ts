@@ -1,8 +1,8 @@
-import type { Track } from "../../core/types/projects";
-import type { MediaClip } from "../../core/types/projects";
-import { pixelToTime } from "../../core/utils/time-coordinate";
+import type { Track } from "@/core/types/projects";
+import type { MediaClip } from "@/core/types/projects";
+import { pixelToTime } from "@/core/utils/time-coordinate";
 import { RULER_HEIGHT, TRACK_HEIGHT } from "./timeline-renderer";
-import { gc } from "../../core/utils/logger";
+import { gc } from "@/core/utils/logger";
 
 const TRIM_HANDLE_WIDTH = 8;
 

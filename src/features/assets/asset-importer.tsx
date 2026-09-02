@@ -1,10 +1,10 @@
 import { useCallback, useRef } from "react";
-import { useProjectStore } from "../../core/stores/project-store.ts";
-import { usePlaybackStore } from "../../core/stores/playback-store.ts";
-import { extractMetadata } from "../../core/webcodecs/demuxer";
-import { storeFileInOpfs } from "../../core/storage/opfs-storage";
-import { generateId } from "../../core/utils/id-generator";
-import { generateThumbnails } from "../../core/webcodecs/thumbnail-generator.ts";
+import { useProjectStore } from "@/core/stores/project-store";
+import { usePlaybackStore } from "@/core/stores/playback-store";
+import { extractMetadata } from "@/core/webcodecs/demuxer";
+import { storeFileInOpfs } from "@/core/storage/opfs-storage";
+import { generateId } from "@/core/utils/id-generator";
+import { generateThumbnails } from "@/core/webcodecs/thumbnail-generator";
 
 export function AssetImporter() {
   const addAsset = useProjectStore((s) => s.addAsset);

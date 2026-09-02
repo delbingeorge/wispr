@@ -1,7 +1,7 @@
-import type { Track } from "../../core/types/projects";
-import type { MediaClip } from "../../core/types/projects";
-import { timeToPixel } from "../../core/utils/time-coordinate";
-import { formatTime } from "../../core/utils/time-format";
+import type { Track } from "@/core/types/projects";
+import type { MediaClip } from "@/core/types/projects";
+import { timeToPixel } from "@/core/utils/time-coordinate";
+import { formatTime } from "@/core/utils/time-format";
 
 const RULER_HEIGHT = 30;
 const TRACK_HEIGHT = 60;
