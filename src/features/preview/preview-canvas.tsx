@@ -3,6 +3,7 @@ import { useProjectStore } from "../../core/stores/project-store";
 import { readFileFromOpfs } from "../../core/storage/opfs-storage";
 import { AssetImporter } from "../../features/assets/asset-importer";
 import { usePlaybackStore } from "../../core/stores/playback-store";
+import { gc } from "../../core/utils/logger";
 
 export function PreviewCanvas() {
   const assets = useProjectStore((s) => s.project.assets);
@@ -11,7 +12,7 @@ export function PreviewCanvas() {
   const seekingFromStore = useRef(false);
 
   const latestAsset = assets[assets.length - 1];
-  console.log(latestAsset);
+  gc.log(latestAsset);
 
   useEffect(() => {
     if (!latestAsset) return;

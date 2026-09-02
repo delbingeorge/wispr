@@ -1,4 +1,5 @@
 import type { MediaClip } from "../../core/types/projects";
+import { gc } from "../../core/utils/logger";
 
 const SNAP_THRESHOLD_PX = 8;
 
@@ -28,10 +29,10 @@ export function findSnapTarget(
   let snapLine: number | null = null;
 
   for (const target of targets) {
-    console.log("cursor reached here");
+    gc.log("cursor reached here");
     const distance = Math.abs(candidateTime - target);
     if (distance < minDistance) {
-      console.log("cursor reached inside condition");
+      gc.log("cursor reached inside condition");
 
       minDistance = distance;
       closest = target;

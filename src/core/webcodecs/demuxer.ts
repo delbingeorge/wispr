@@ -1,4 +1,5 @@
 import { createFile, type MP4ArrayBuffer, type MP4Info } from "mp4box";
+import { gc } from "../../core/utils/logger";
 
 type VideoMetadata = {
   width: number;
@@ -13,7 +14,7 @@ export function extractMetadata(file: File): Promise<VideoMetadata> {
 
     mp4boxFile.onReady = (info: MP4Info) => {
       const videoTrack = info.tracks.find((t) => t.type === "video");
-      console.log("Video OBJ: ", videoTrack);
+      gc.log("Video OBJ: ", videoTrack);
 
       if (!videoTrack || !videoTrack.video) {
         reject(new Error("No video track found"));
