@@ -1,7 +1,7 @@
 import styles from "./app.module.css";
 import { PreviewCanvas } from "./features/preview/preview-canvas";
 import { TimelineCanvas } from "./features/timeline/timeline-canvas";
-import { useTimelineKeyboard } from "./features/timeline/use-timelilne-keyboard";
+import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 
 export default function App() {
   useTimelineKeyboard();

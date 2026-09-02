@@ -8,6 +8,11 @@ import { hitTest } from "./hit-test";
 import { getThumbnail } from "../../core/webcodecs/thumbnail-generator";
 import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
 import { findSnapTarget } from "./snap-system";
+import { useHistoryStore } from "../../core/stores/history-store";
+import {
+  createMoveCommand,
+  createTrimCommand,
+} from "../../core/commands/clip-commands";
 
 const renderer = new TimelineRenderer();
 
@@ -95,24 +100,33 @@ export function TimelineCanvas() {
     };
   }, []);
 
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const { zoom, scrollX, setZoom, setScrollX } = useTimelineStore.getState();
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    if (e.ctrlKey || e.metaKey) {
-      const newZoom = Math.max(
-        10,
-        Math.min(1000, zoom * (1 - e.deltaY * 0.005)),
-      );
-      const rect = canvasRef.current!.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const timeAtMouse = (mouseX + scrollX) / zoom;
-      const newScrollX = timeAtMouse * newZoom - mouseX;
-      setZoom(newZoom);
-      setScrollX(Math.max(0, newScrollX));
-    } else {
-      setScrollX(Math.max(0, scrollX + e.deltaX + e.deltaY));
-    }
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const { zoom, scrollX, setZoom, setScrollX } =
+        useTimelineStore.getState();
+
+      if (e.ctrlKey || e.metaKey) {
+        const newZoom = Math.max(
+          10,
+          Math.min(1000, zoom * (1 - e.deltaY * 0.005)),
+        );
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const timeAtMouse = (mouseX + scrollX) / zoom;
+        const newScrollX = timeAtMouse * newZoom - mouseX;
+        setZoom(newZoom);
+        setScrollX(Math.max(0, newScrollX));
+      } else {
+        setScrollX(Math.max(0, scrollX + e.deltaX + e.deltaY));
+      }
+    };
+
+    canvas.addEventListener("wheel", onWheel, { passive: false });
+    return () => canvas.removeEventListener("wheel", onWheel);
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -257,6 +271,56 @@ export function TimelineCanvas() {
   }, []);
 
   const handleMouseUp = useCallback(() => {
+    if (dragRef.current) {
+      const {
+        clipId,
+        region,
+        originalStartTime,
+        originalDuration,
+        originalInPoint,
+      } = dragRef.current;
+      const clip = useProjectStore.getState().clips[clipId];
+
+      if (clip && region === "body" && clip.startTime !== originalStartTime) {
+        const command = createMoveCommand(
+          clipId,
+          originalStartTime,
+          clip.startTime,
+        );
+        useHistoryStore.setState((state) => ({
+          undoStack: [...state.undoStack.slice(-99), command],
+          redoStack: [],
+        }));
+      }
+
+      if (clip && (region === "trimStart" || region === "trimEnd")) {
+        const changed =
+          clip.startTime !== originalStartTime ||
+          clip.duration !== originalDuration;
+        if (changed) {
+          const command = createTrimCommand(
+            clipId,
+            {
+              startTime: originalStartTime,
+              duration: originalDuration,
+              inPoint: originalInPoint,
+              outPoint: originalInPoint + originalDuration,
+            },
+            {
+              startTime: clip.startTime,
+              duration: clip.duration,
+              inPoint: clip.inPoint,
+              outPoint: clip.outPoint,
+            },
+          );
+          useHistoryStore.setState((state) => ({
+            undoStack: [...state.undoStack.slice(-99), command],
+            redoStack: [],
+          }));
+        }
+      }
+    }
+
     dragRef.current = null;
     snapLineRef.current = null;
   }, []);
@@ -265,7 +329,6 @@ export function TimelineCanvas() {
     <canvas
       ref={canvasRef}
       style={{ width: "100%", height: "100%", display: "block" }}
-      onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}

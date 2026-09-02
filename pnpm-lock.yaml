@@ -17,6 +17,9 @@ importers:
       react-dom:
         specifier: ^19.2.8
         version: 19.2.8(react@19.2.8)
+      the-good-console:
+        specifier: ^0.0.1
+        version: 0.0.1
       zustand:
         specifier: ^5.0.15
         version: 5.0.15(@types/react@19.2.18)(react@19.2.8)
@@ -635,6 +638,9 @@ packages:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
     engines: {node: '>=0.10.0'}
 
+  the-good-console@0.0.1:
+    resolution: {integrity: sha512-/Qi7NE5ZYw/Yxz/8WJNLBt1YN2P5yGEK7d7XN25fZ4B9IkdtywPbdQ+0WwyDtq6+BrB33hbDpIGYHqB0DAjTwQ==}
+
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -1164,6 +1170,8 @@ snapshots:
   semver@6.3.1: {}
 
   source-map-js@1.2.1: {}
+
+  the-good-console@0.0.1: {}
 
   tinyglobby@0.2.17:
     dependencies:
