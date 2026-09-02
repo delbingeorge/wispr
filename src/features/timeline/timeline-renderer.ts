@@ -19,6 +19,7 @@ type RenderData = {
   assetNames: Record<string, string>;
   width: number;
   height: number;
+  snapLine: number | null;
   getThumbnail: (assetId: string, timestamp: number) => ImageBitmap | null;
   selectedClipIds: Set<string>;
 };
@@ -30,6 +31,7 @@ export class TimelineRenderer {
     this.renderClips(ctx, data);
     this.renderRuler(ctx, data);
     this.renderPlayhead(ctx, data);
+    this.renderSnapLine(ctx, data);
   }
 
   private renderTrackLanes(ctx: CanvasRenderingContext2D, data: RenderData) {
@@ -221,6 +223,22 @@ export class TimelineRenderer {
     ctx.lineTo(x, y + r);
     ctx.arcTo(x, y, x + r, y, r);
     ctx.closePath();
+  }
+
+  private renderSnapLine(ctx: CanvasRenderingContext2D, data: RenderData) {
+    if (data.snapLine === null) return;
+
+    const x = timeToPixel(data.snapLine, data.zoom, data.scrollX);
+    if (x < 0 || x > data.width) return;
+
+    ctx.strokeStyle = "#e8e44f";
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.moveTo(Math.round(x) + 0.5, RULER_HEIGHT);
+    ctx.lineTo(Math.round(x) + 0.5, data.height);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 }
 

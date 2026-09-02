@@ -7,6 +7,7 @@ import { pixelToTime } from "../../core/utils/time-coordinate";
 import { hitTest } from "./hit-test";
 import { getThumbnail } from "../../core/webcodecs/thumbnail-generator";
 import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
+import { findSnapTarget } from "./snap-system";
 
 const renderer = new TimelineRenderer();
 
@@ -24,6 +25,7 @@ export function TimelineCanvas() {
   const dirtyRef = useRef(true);
   const rafRef = useRef<number>(0);
   const dragRef = useRef<DragState | null>(null);
+  const snapLineRef = useRef<number | null>(null);
 
   const markDirty = useCallback(() => {
     dirtyRef.current = true;
@@ -76,6 +78,7 @@ export function TimelineCanvas() {
               {},
             ),
           selectedClipIds: useSelectionStore.getState().selectedClipIds,
+          snapLine: snapLineRef.current,
           getThumbnail,
           width: rect.width,
           height: rect.height,
@@ -176,12 +179,46 @@ export function TimelineCanvas() {
     const deltaTime = deltaX / zoom;
 
     if (dragRef.current.region === "body") {
-      const newStartTime = Math.max(
+      const rawStartTime = Math.max(
         0,
         dragRef.current.originalStartTime + deltaTime,
       );
+      const clip = useProjectStore.getState().clips[dragRef.current.clipId];
+      const currentTime = usePlaybackStore.getState().currentTime;
+
+      const startSnap = findSnapTarget(
+        rawStartTime,
+        useProjectStore.getState().clips,
+        currentTime,
+        dragRef.current.clipId,
+        zoom,
+      );
+      const endSnap = findSnapTarget(
+        rawStartTime + clip.duration,
+        useProjectStore.getState().clips,
+        currentTime,
+        dragRef.current.clipId,
+        zoom,
+      );
+
+      let snappedStart = rawStartTime;
+      snapLineRef.current = null;
+
+      if (
+        startSnap.snapLine !== null &&
+        (endSnap.snapLine === null ||
+          Math.abs(startSnap.snappedTime - rawStartTime) <=
+            Math.abs(endSnap.snappedTime - (rawStartTime + clip.duration)))
+      ) {
+        snappedStart = startSnap.snappedTime;
+        snapLineRef.current = startSnap.snapLine;
+      } else if (endSnap.snapLine !== null) {
+        snappedStart = endSnap.snappedTime - clip.duration;
+        snapLineRef.current = endSnap.snapLine;
+      }
+
       useProjectStore.getState().updateClip(dragRef.current.clipId, {
-        startTime: newStartTime,
+        startTime: Math.max(0, snappedStart),
       });
     }
 
@@ -221,6 +258,7 @@ export function TimelineCanvas() {
 
   const handleMouseUp = useCallback(() => {
     dragRef.current = null;
+    snapLineRef.current = null;
   }, []);
 
   return (
