@@ -2,16 +2,28 @@ import { useRef, useEffect, useCallback } from "react";
 import { useProjectStore } from "../../core/stores/project-store";
 import { usePlaybackStore } from "../../core/stores/playback-store";
 import { useTimelineStore } from "../../core/stores/timeline-store";
+import { useSelectionStore } from "../../core/stores/selection-store";
 import { pixelToTime } from "../../core/utils/time-coordinate";
-import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
+import { hitTest } from "./hit-test";
 import { getThumbnail } from "../../core/webcodecs/thumbnail-generator";
+import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
 
 const renderer = new TimelineRenderer();
+
+type DragState = {
+  clipId: string;
+  region: "body" | "trimStart" | "trimEnd";
+  startMouseX: number;
+  originalStartTime: number;
+  originalDuration: number;
+  originalInPoint: number;
+};
 
 export function TimelineCanvas() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const dirtyRef = useRef(true);
   const rafRef = useRef<number>(0);
+  const dragRef = useRef<DragState | null>(null);
 
   const markDirty = useCallback(() => {
     dirtyRef.current = true;
@@ -22,6 +34,7 @@ export function TimelineCanvas() {
       useProjectStore.subscribe(markDirty),
       usePlaybackStore.subscribe(markDirty),
       useTimelineStore.subscribe(markDirty),
+      useSelectionStore.subscribe(markDirty),
     ];
     return () => unsubs.forEach((fn) => fn());
   }, [markDirty]);
@@ -62,6 +75,7 @@ export function TimelineCanvas() {
               (acc, asset) => ({ ...acc, [asset.id]: asset.name }),
               {},
             ),
+          selectedClipIds: useSelectionStore.getState().selectedClipIds,
           getThumbnail,
           width: rect.width,
           height: rect.height,
@@ -103,29 +117,110 @@ export function TimelineCanvas() {
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
 
-    if (y <= RULER_HEIGHT) {
-      const { zoom, scrollX } = useTimelineStore.getState();
-      const time = pixelToTime(e.clientX - rect.left, zoom, scrollX);
-      usePlaybackStore.getState().setCurrentTime(Math.max(0, time));
+    const { zoom, scrollX } = useTimelineStore.getState();
+    const { project, clips } = useProjectStore.getState();
+
+    const result = hitTest(
+      mouseX,
+      mouseY,
+      zoom,
+      scrollX,
+      project.tracks,
+      clips,
+    );
+
+    if (result.type === "ruler") {
+      usePlaybackStore.getState().setCurrentTime(result.time);
+      useSelectionStore.getState().deselectAll();
+    } else if (result.type === "clip") {
+      useSelectionStore.getState().selectClip(result.clipId);
+
+      const clip = clips[result.clipId];
+      if (clip) {
+        dragRef.current = {
+          clipId: result.clipId,
+          region: result.region,
+          startMouseX: mouseX,
+          originalStartTime: clip.startTime,
+          originalDuration: clip.duration,
+          originalInPoint: clip.inPoint,
+        };
+      }
+    } else {
+      useSelectionStore.getState().deselectAll();
     }
   }, []);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (e.buttons !== 1) return;
-
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (e.buttons !== 1) return;
 
     const rect = canvas.getBoundingClientRect();
-    const y = e.clientY - rect.top;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const { zoom, scrollX } = useTimelineStore.getState();
 
-    if (y <= RULER_HEIGHT) {
-      const { zoom, scrollX } = useTimelineStore.getState();
-      const time = pixelToTime(e.clientX - rect.left, zoom, scrollX);
-      usePlaybackStore.getState().setCurrentTime(Math.max(0, time));
+    if (!dragRef.current) {
+      if (mouseY <= RULER_HEIGHT) {
+        const time = pixelToTime(mouseX, zoom, scrollX);
+        usePlaybackStore.getState().setCurrentTime(Math.max(0, time));
+      }
+      return;
     }
+
+    const deltaX = mouseX - dragRef.current.startMouseX;
+    const deltaTime = deltaX / zoom;
+
+    if (dragRef.current.region === "body") {
+      const newStartTime = Math.max(
+        0,
+        dragRef.current.originalStartTime + deltaTime,
+      );
+      useProjectStore.getState().updateClip(dragRef.current.clipId, {
+        startTime: newStartTime,
+      });
+    }
+
+    if (dragRef.current.region === "trimStart") {
+      const maxDelta = dragRef.current.originalDuration - 0.1;
+      const clampedDelta = Math.max(
+        -dragRef.current.originalInPoint,
+        Math.min(maxDelta, deltaTime),
+      );
+      useProjectStore.getState().updateClip(dragRef.current.clipId, {
+        startTime: dragRef.current.originalStartTime + clampedDelta,
+        duration: dragRef.current.originalDuration - clampedDelta,
+        inPoint: dragRef.current.originalInPoint + clampedDelta,
+      });
+    }
+
+    if (dragRef.current.region === "trimEnd") {
+      const clip = useProjectStore.getState().clips[dragRef.current.clipId];
+      if (clip) {
+        const asset = useProjectStore
+          .getState()
+          .project.assets.find((a) => a.id === clip.assetId);
+        const maxDuration = asset
+          ? asset.duration - clip.inPoint
+          : clip.duration;
+        const newDuration = Math.max(
+          0.1,
+          Math.min(maxDuration, dragRef.current.originalDuration + deltaTime),
+        );
+        useProjectStore.getState().updateClip(dragRef.current.clipId, {
+          duration: newDuration,
+          outPoint: clip.inPoint + newDuration,
+        });
+      }
+    }
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    dragRef.current = null;
   }, []);
 
   return (
@@ -135,6 +230,8 @@ export function TimelineCanvas() {
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
     />
   );
 }

@@ -7,6 +7,7 @@ type ProjectState = {
   clips: Record<string, MediaClip>;
   addAsset: (asset: Asset) => void;
   addClip: (clip: MediaClip) => void;
+  updateClip: (clipId: string, updates: Partial<MediaClip>) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -55,4 +56,17 @@ export const useProjectStore = create<ProjectState>((set) => ({
         updatedAt: Date.now(),
       },
     })),
+
+  updateClip: (clipId, updates) => {
+    set((state) => ({
+      clips: {
+        ...state.clips,
+        [clipId]: { ...state.clips[clipId], ...updates },
+      },
+      project: {
+        ...state.project,
+        updatedAt: Date.now(),
+      },
+    }));
+  },
 }));

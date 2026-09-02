@@ -20,6 +20,7 @@ type RenderData = {
   width: number;
   height: number;
   getThumbnail: (assetId: string, timestamp: number) => ImageBitmap | null;
+  selectedClipIds: Set<string>;
 };
 
 export class TimelineRenderer {
@@ -74,6 +75,13 @@ export class TimelineRenderer {
         ctx.lineWidth = 1;
         this.roundRect(ctx, x, y, width, height, CLIP_RADIUS);
         ctx.stroke();
+
+        if (data.selectedClipIds.has(clipId)) {
+          ctx.strokeStyle = "#e8e44f";
+          ctx.lineWidth = 2;
+          this.roundRect(ctx, x, y, width, height, CLIP_RADIUS);
+          ctx.stroke();
+        }
 
         const name = data.assetNames[clip.assetId] ?? "";
         const textPadding = 8;
