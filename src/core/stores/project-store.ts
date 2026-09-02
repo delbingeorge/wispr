@@ -8,6 +8,8 @@ type ProjectState = {
   addAsset: (asset: Asset) => void;
   addClip: (clip: MediaClip) => void;
   updateClip: (clipId: string, updates: Partial<MediaClip>) => void;
+  splitClip: (clipId: string, splitTime: number) => void;
+  removeClip: (clipId: string) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -69,4 +71,69 @@ export const useProjectStore = create<ProjectState>((set) => ({
       },
     }));
   },
+
+  splitClip: (clipId, splitTime) =>
+    set((state) => {
+      const clip = state.clips[clipId];
+      if (!clip) return state;
+      if (
+        splitTime <= clip.startTime ||
+        splitTime >= clip.startTime + clip.duration
+      )
+        return state;
+
+      const splitOffset = splitTime - clip.startTime;
+      const newClipId = generateId();
+
+      const leftClip: MediaClip = {
+        ...clip,
+        duration: splitOffset,
+        outPoint: clip.inPoint + splitOffset,
+      };
+
+      const rightClip: MediaClip = {
+        id: newClipId,
+        trackId: clip.trackId,
+        assetId: clip.assetId,
+        kind: "media",
+        startTime: splitTime,
+        duration: clip.duration - splitOffset,
+        inPoint: clip.inPoint + splitOffset,
+        outPoint: clip.outPoint,
+      };
+
+      const newClips = {
+        ...state.clips,
+        [clipId]: leftClip,
+        [newClipId]: rightClip,
+      };
+
+      const newTracks = state.project.tracks.map((track) => {
+        if (track.id !== clip.trackId) return track;
+        const clipIndex = track.clips.indexOf(clipId);
+        const newClipIds = [...track.clips];
+        newClipIds.splice(clipIndex + 1, 0, newClipId);
+        return { ...track, clips: newClipIds };
+      });
+
+      return {
+        clips: newClips,
+        project: { ...state.project, tracks: newTracks, updatedAt: Date.now() },
+      };
+    }),
+
+  removeClip: (clipId) =>
+    set((state) => {
+      const { [clipId]: removed, ...remainingClips } = state.clips;
+
+      const newTracks = state.project.tracks.map((track) => ({
+        ...track,
+        clips: track.clips.filter((id) => id !== clipId),
+      }));
+
+      return {
+        clips: remainingClips,
+        project: { ...state.project, tracks: newTracks, updatedAt: Date.now() },
+      };
+    }),
 }));
