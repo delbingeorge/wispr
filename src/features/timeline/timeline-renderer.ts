@@ -1,4 +1,4 @@
-import type { Track } from "@/core/types/projects";
+import type { Clip, Track } from "@/core/types/projects";
 import type { MediaClip } from "@/core/types/projects";
 import { timeToPixel } from "@/core/utils/time-coordinate";
 import { formatTime } from "@/core/utils/time-format";
@@ -15,7 +15,7 @@ type RenderData = {
   scrollX: number;
   currentTime: number;
   tracks: Track[];
-  clips: Record<string, MediaClip>;
+  clips: Record<string, Clip>;
   assetNames: Record<string, string>;
   width: number;
   height: number;
@@ -66,14 +66,26 @@ export class TimelineRenderer {
         this.roundRect(ctx, x, y, width, height, CLIP_RADIUS);
         ctx.clip();
 
-        ctx.fillStyle = "#3a5a3a";
-        ctx.fillRect(x, y, width, height);
-
-        this.renderThumbnails(ctx, clip, data, x, y, width, height);
+        if (clip.kind === "media") {
+          ctx.fillStyle = "#3a5a3a";
+          ctx.fillRect(x, y, width, height);
+          this.renderThumbnails(ctx, clip, data, x, y, width, height);
+        } else if (clip.kind === "text") {
+          ctx.fillStyle = "#3a3a5a";
+          ctx.fillRect(x, y, width, height);
+        } else if (clip.kind === "shape") {
+          ctx.fillStyle = "#5a3a3a";
+          ctx.fillRect(x, y, width, height);
+        }
 
         ctx.restore();
 
-        ctx.strokeStyle = "#4a7a4a";
+        ctx.strokeStyle =
+          clip.kind === "media"
+            ? "#4a7a4a"
+            : clip.kind === "text"
+              ? "#4a4a7a"
+              : "#7a4a4a";
         ctx.lineWidth = 1;
         this.roundRect(ctx, x, y, width, height, CLIP_RADIUS);
         ctx.stroke();
@@ -85,7 +97,15 @@ export class TimelineRenderer {
           ctx.stroke();
         }
 
-        const name = data.assetNames[clip.assetId] ?? "";
+        let name = "";
+        if (clip.kind === "media") {
+          name = data.assetNames[clip.assetId] ?? "";
+        } else if (clip.kind === "text") {
+          name = clip.text || "Text";
+        } else if (clip.kind === "shape") {
+          name = clip.shapeType;
+        }
+
         const textPadding = 8;
         const maxTextWidth = width - textPadding * 2;
 

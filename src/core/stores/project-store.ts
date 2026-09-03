@@ -1,13 +1,13 @@
 import { create } from "zustand";
-import type { Project, Asset, MediaClip } from "@/core/types/projects";
+import type { Project, Asset, MediaClip, Clip } from "@/core/types/projects";
 import { generateId } from "@/core/utils/id-generator";
 
 type ProjectState = {
   project: Project;
-  clips: Record<string, MediaClip>;
+  clips: Record<string, Clip>;
   addAsset: (asset: Asset) => void;
-  addClip: (clip: MediaClip) => void;
-  updateClip: (clipId: string, updates: Partial<MediaClip>) => void;
+  addClip: (clip: Clip) => void;
+  updateClip: (clipId: string, updates: Partial<Clip>) => void;
   splitClip: (clipId: string, splitTime: number) => void;
   removeClip: (clipId: string) => void;
 };
@@ -63,7 +63,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set((state) => ({
       clips: {
         ...state.clips,
-        [clipId]: { ...state.clips[clipId], ...updates },
+        [clipId]: { ...state.clips[clipId], ...updates } as Clip,
       },
       project: {
         ...state.project,
@@ -75,7 +75,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
   splitClip: (clipId, splitTime) =>
     set((state) => {
       const clip = state.clips[clipId];
-      if (!clip) return state;
+      if (!clip || clip.kind !== "media") return state;
+
       if (
         splitTime <= clip.startTime ||
         splitTime >= clip.startTime + clip.duration

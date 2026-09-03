@@ -1,5 +1,4 @@
-import type { Track } from "@/core/types/projects";
-import type { MediaClip } from "@/core/types/projects";
+import type { Clip, Track } from "@/core/types/projects";
 import { pixelToTime } from "@/core/utils/time-coordinate";
 import { RULER_HEIGHT, TRACK_HEIGHT } from "./timeline-renderer";
 import { gc } from "@/core/utils/logger";
@@ -22,7 +21,7 @@ export function hitTest(
   zoom: number,
   scrollX: number,
   tracks: Track[],
-  clips: Record<string, MediaClip>,
+  clips: Record<string, Clip>,
 ): HitTestResult {
   if (mouseY <= RULER_HEIGHT) {
     return {

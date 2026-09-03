@@ -57,13 +57,67 @@ type MediaClip = {
   outPoint: number;
 };
 
+type BaseOverlayProperties = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  rotation: number;
+  opacity: number;
+};
+
+type ShapeProperties = BaseOverlayProperties & {
+  fill: string;
+  stroke: string;
+  strokeWidth: number;
+};
+
+type TextProperties = BaseOverlayProperties & {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: "normal" | "bold";
+  fill: string;
+  textAlign: "left" | "center" | "right";
+};
+
+type ShapeType = "rectangle" | "ellipse" | "line" | "arrow";
+
+type TextClip = {
+  id: string;
+  trackId: string;
+  kind: "text";
+  startTime: number;
+  duration: number;
+  text: string;
+  properties: TextProperties;
+};
+
+type ShapeClip = {
+  id: string;
+  trackId: string;
+  kind: "shape";
+  shapeType: ShapeType;
+  startTime: number;
+  duration: number;
+  properties: ShapeProperties;
+};
+
+type Clip = MediaClip | TextClip | ShapeClip;
+
 export type {
   Resolution,
   MediaMetadata,
   AssetType,
+  Asset,
   TrackType,
   Track,
   Project,
-  Asset,
   MediaClip,
+  BaseOverlayProperties,
+  ShapeProperties,
+  TextProperties,
+  ShapeType,
+  TextClip,
+  ShapeClip,
+  Clip,
 };

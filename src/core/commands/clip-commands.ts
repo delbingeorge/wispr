@@ -1,5 +1,5 @@
 import type { Command } from "@/core/commands/types";
-import type { MediaClip } from "@/core/types/projects";
+import type { Clip, MediaClip } from "@/core/types/projects";
 import { useProjectStore } from "@/core/stores/project-store";
 
 export function createMoveCommand(
@@ -28,7 +28,7 @@ export function createTrimCommand(
   };
 }
 
-export function createDeleteCommand(clipId: string, clip: MediaClip): Command {
+export function createDeleteCommand(clipId: string, clip: Clip): Command {
   return {
     execute: () => useProjectStore.getState().removeClip(clipId),
     undo: () => {
