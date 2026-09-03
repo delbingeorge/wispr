@@ -1,4 +1,4 @@
-import type { MediaClip } from "@/core/types/projects";
+import type { Clip } from "@/core/types/projects";
 import { gc } from "@/core/utils/logger";
 
 const SNAP_THRESHOLD_PX = 8;
@@ -10,7 +10,7 @@ type SnapResult = {
 
 export function findSnapTarget(
   candidateTime: number,
-  clips: Record<string, MediaClip>,
+  clips: Record<string, Clip>,
   currentTime: number,
   excludeClipId: string,
   zoom: number,

@@ -5,6 +5,7 @@ import type {
   MediaClip,
   Clip,
   TrackType,
+  Track,
 } from "@/core/types/projects";
 import { generateId } from "@/core/utils/id-generator";
 
@@ -17,6 +18,8 @@ type ProjectState = {
   splitClip: (clipId: string, splitTime: number) => void;
   removeClip: (clipId: string) => void;
   addTrack: (type: TrackType, label: string) => void;
+  removeTrack: (trackId: string) => void;
+  updateTrack: (trackId: string, updates: Partial<Track>) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -161,6 +164,36 @@ export const useProjectStore = create<ProjectState>((set) => ({
             visible: true,
           },
         ],
+        updatedAt: Date.now(),
+      },
+    })),
+
+  removeTrack: (trackId) =>
+    set((state) => {
+      const trackClipIds =
+        state.project.tracks.find((t) => t.id === trackId)?.clips ?? [];
+      const remainingClips = { ...state.clips };
+      for (const clipId of trackClipIds) {
+        delete remainingClips[clipId];
+      }
+
+      return {
+        clips: remainingClips,
+        project: {
+          ...state.project,
+          tracks: state.project.tracks.filter((t) => t.id !== trackId),
+          updatedAt: Date.now(),
+        },
+      };
+    }),
+
+  updateTrack: (trackId, updates) =>
+    set((state) => ({
+      project: {
+        ...state.project,
+        tracks: state.project.tracks.map((t) =>
+          t.id === trackId ? { ...t, ...updates } : t,
+        ),
         updatedAt: Date.now(),
       },
     })),

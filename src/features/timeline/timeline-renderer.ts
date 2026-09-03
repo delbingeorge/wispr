@@ -37,7 +37,12 @@ export class TimelineRenderer {
   private renderTrackLanes(ctx: CanvasRenderingContext2D, data: RenderData) {
     for (let i = 0; i < data.tracks.length; i++) {
       const y = RULER_HEIGHT + i * TRACK_HEIGHT;
-      ctx.fillStyle = i % 2 === 0 ? "#1e1e1e" : "#242424";
+      const track = data.tracks[i];
+      ctx.fillStyle = !track.visible
+        ? "#161616"
+        : i % 2 === 0
+          ? "#1e1e1e"
+          : "#242424";
       ctx.fillRect(0, y, data.width, TRACK_HEIGHT);
 
       ctx.fillStyle = "#3a3a3a";
@@ -48,6 +53,8 @@ export class TimelineRenderer {
   private renderClips(ctx: CanvasRenderingContext2D, data: RenderData) {
     for (let i = 0; i < data.tracks.length; i++) {
       const track = data.tracks[i];
+      if (!track.visible) continue;
+
       const trackY = RULER_HEIGHT + i * TRACK_HEIGHT;
 
       for (const clipId of track.clips) {

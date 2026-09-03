@@ -3,6 +3,7 @@ import { PlaybackControls } from "./features/preview/playback-controls";
 import { PreviewCanvas } from "./features/preview/preview-canvas";
 import { PropertiesPanel } from "./features/properties/properties-panel";
 import { TimelineCanvas } from "./features/timeline/timeline-canvas";
+import { TrackSidebar } from "./features/timeline/track-sidebar";
 import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 import { Toolbar } from "./features/toolbar/toolbar";
 
@@ -17,8 +18,11 @@ export default function App() {
       </div>
       <PropertiesPanel />
       <PlaybackControls />
-      <div className={styles.timeline}>
-        <TimelineCanvas />
+      <div className={styles.timelineArea}>
+        <TrackSidebar />
+        <div className={styles.timeline}>
+          <TimelineCanvas />
+        </div>
       </div>
     </div>
   );

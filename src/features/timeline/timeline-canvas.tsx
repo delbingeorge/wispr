@@ -157,13 +157,15 @@ export function TimelineCanvas() {
 
       const clip = clips[result.clipId];
       if (clip) {
+        const track = project.tracks.find((t) => t.id === clip.trackId);
+        if (track?.locked) return;
         dragRef.current = {
           clipId: result.clipId,
           region: result.region,
           startMouseX: mouseX,
           originalStartTime: clip.startTime,
           originalDuration: clip.duration,
-          originalInPoint: clip.inPoint,
+          originalInPoint: clip.kind === "media" ? clip.inPoint : 0,
         };
       }
     } else {
@@ -251,7 +253,7 @@ export function TimelineCanvas() {
 
     if (dragRef.current.region === "trimEnd") {
       const clip = useProjectStore.getState().clips[dragRef.current.clipId];
-      if (clip) {
+      if (clip && clip.kind === "media") {
         const asset = useProjectStore
           .getState()
           .project.assets.find((a) => a.id === clip.assetId);
@@ -294,6 +296,7 @@ export function TimelineCanvas() {
       }
 
       if (clip && (region === "trimStart" || region === "trimEnd")) {
+        if (clip.kind !== "media") return;
         const changed =
           clip.startTime !== originalStartTime ||
           clip.duration !== originalDuration;
