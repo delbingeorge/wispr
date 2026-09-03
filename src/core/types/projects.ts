@@ -91,6 +91,7 @@ type TextClip = {
   duration: number;
   text: string;
   properties: TextProperties;
+  keyframes: Keyframe[];
 };
 
 type ShapeClip = {
@@ -101,9 +102,20 @@ type ShapeClip = {
   startTime: number;
   duration: number;
   properties: ShapeProperties;
+  keyframes: Keyframe[];
 };
 
 type Clip = MediaClip | TextClip | ShapeClip;
+
+type EasingType = "linear" | "ease-in" | "ease-out" | "ease-in-out";
+
+type Keyframe = {
+  id: string;
+  time: number;
+  property: string;
+  value: number;
+  easing: EasingType;
+};
 
 export type {
   Resolution,
@@ -121,4 +133,6 @@ export type {
   TextClip,
   ShapeClip,
   Clip,
+  EasingType,
+  Keyframe,
 };
