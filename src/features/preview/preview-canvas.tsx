@@ -6,7 +6,8 @@ import { usePlaybackEngine } from "./use-playback-engine";
 import { AssetImporter } from "../assets/asset-importer";
 import { renderOverlays } from "./overlay-renderer";
 import styles from "./styles/preview-canvas.module.css";
-import { useOverlayPlacement } from "./use-overlay-placement";
+import { useOverlayInteraction } from "./use-overlay-interaction";
+import { useSelectionStore } from "@/core/stores/selection-store";
 
 export function PreviewCanvas() {
   const assets = useProjectStore((s) => s.project.assets);
@@ -17,7 +18,8 @@ export function PreviewCanvas() {
 
   usePlaybackEngine(videoRef);
 
-  const handleCanvasClick = useOverlayPlacement(canvasRef);
+  const { handleMouseDown, handleMouseMove, handleMouseUp } =
+    useOverlayInteraction(canvasRef);
 
   const latestAsset = assets[assets.length - 1];
 
@@ -75,6 +77,10 @@ export function PreviewCanvas() {
         .filter((t) => t.type === "overlay")
         .flatMap((t) => t.clips);
 
+      const selectedClipIds = useSelectionStore.getState().selectedClipIds;
+      const selectedClipId =
+        selectedClipIds.size === 1 ? [...selectedClipIds][0] : null;
+
       renderOverlays(
         ctx,
         clips,
@@ -84,6 +90,7 @@ export function PreviewCanvas() {
         rect.height,
         project.resolution.width,
         project.resolution.height,
+        selectedClipId,
       );
 
       console.log(
@@ -112,9 +119,12 @@ export function PreviewCanvas() {
         className={styles.video}
       />
       <canvas
-        onClick={handleCanvasClick}
         ref={canvasRef}
         className={styles.overlay}
+        onMouseDown={handleMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
       />
     </div>
   );
