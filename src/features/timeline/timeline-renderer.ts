@@ -1,5 +1,4 @@
-import type { Clip, Track } from "@/core/types/projects";
-import type { MediaClip } from "@/core/types/projects";
+import type { Clip, Track, Keyframe, MediaClip } from "@/core/types/projects";
 import { timeToPixel } from "@/core/utils/time-coordinate";
 import { formatTime } from "@/core/utils/time-format";
 
@@ -117,6 +116,17 @@ export class TimelineRenderer {
           name = clip.shapeType;
         }
 
+        if (clip.kind === "text" || clip.kind === "shape") {
+          this.renderKeyframeDiamonds(
+            ctx,
+            clip.keyframes ?? [],
+            x,
+            y,
+            height,
+            data.zoom,
+          );
+        }
+
         const textPadding = 8;
         const maxTextWidth = width - textPadding * 2;
 
@@ -225,6 +235,32 @@ export class TimelineRenderer {
     ctx.beginPath();
     ctx.arc(Math.round(x), RULER_HEIGHT, 5, 0, Math.PI * 2);
     ctx.fill();
+  }
+
+  private renderKeyframeDiamonds(
+    ctx: CanvasRenderingContext2D,
+    keyframes: Keyframe[],
+    clipX: number,
+    clipY: number,
+    clipHeight: number,
+    zoom: number,
+  ) {
+    const seen = new Set<number>();
+
+    for (const kf of keyframes) {
+      if (seen.has(kf.time)) continue;
+      seen.add(kf.time);
+
+      const x = clipX + kf.time * zoom;
+      const y = clipY + clipHeight - 8;
+
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = "#e8e44f";
+      ctx.fillRect(-3, -3, 6, 6);
+      ctx.restore();
+    }
   }
 
   private pickTickInterval(zoom: number): number {
