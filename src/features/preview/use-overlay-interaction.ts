@@ -227,6 +227,7 @@ export function useOverlayInteraction(
           fill: "#ffffff",
           textAlign: "center",
         },
+        keyframes: [],
       };
       useProjectStore.getState().addClip(clip);
     } else {
@@ -248,6 +249,7 @@ export function useOverlayInteraction(
           stroke: "#ffffff",
           strokeWidth: 2,
         },
+        keyframes: [],
       };
       useProjectStore.getState().addClip(clip);
     }

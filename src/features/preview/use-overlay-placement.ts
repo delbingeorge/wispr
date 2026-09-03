@@ -57,6 +57,7 @@ export function useOverlayPlacement(
             fill: "#ffffff",
             textAlign: "center",
           },
+          keyframes: [],
         };
         useProjectStore.getState().addClip(clip);
       } else {
@@ -78,6 +79,7 @@ export function useOverlayPlacement(
             stroke: "#ffffff",
             strokeWidth: 2,
           },
+          keyframes: [],
         };
         useProjectStore.getState().addClip(clip);
       }
