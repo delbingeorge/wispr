@@ -6,7 +6,7 @@ type PlaybackState = {
   playbackRate: number;
   duration: number;
   setCurrentTime: (time: number) => void;
-  setDuraction: (duration: number) => void;
+  setDuration: (duration: number) => void;
   play: () => void;
   pause: () => void;
   togglePlayback: () => void;
@@ -20,7 +20,7 @@ export const usePlaybackStore = create<PlaybackState>((set, get) => ({
   duration: 0,
 
   setCurrentTime: (time) => set({ currentTime: time }),
-  setDuraction: (duration) => set({ duration }),
+  setDuration: (duration) => set({ duration }),
 
   play: () => set({ isPlaying: true }),
   pause: () => set({ isPlaying: false }),

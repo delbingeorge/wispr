@@ -72,10 +72,7 @@ export function PlaybackControls() {
           onClick={handleTogglePlay}
           title={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? 
-<Puse
-
-            "Pause Icon" : "Play Icon"}
+          {isPlaying ? "Pause Icon" : "Play Icon"}
         </button>
         <button
           className={styles.btn}
