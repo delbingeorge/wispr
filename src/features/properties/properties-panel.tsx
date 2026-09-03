@@ -1,7 +1,7 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
-import type { TextClip, ShapeClip } from "@/core/types/projects";
 import styles from "./styles/properties-panel.module.css";
+import { KeyframeSection } from "./keyframe-section";
 
 export function PropertiesPanel() {
   const selectedClipIds = useSelectionStore((s) => s.selectedClipIds);
@@ -186,6 +186,8 @@ export function PropertiesPanel() {
           </div>
         </div>
       )}
+
+      <KeyframeSection clipId={clipId} clip={clip} />
     </div>
   );
 }

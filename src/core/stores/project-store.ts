@@ -17,6 +17,8 @@ type ProjectState = {
   updateClip: (clipId: string, updates: Partial<Clip>) => void;
   splitClip: (clipId: string, splitTime: number) => void;
   removeClip: (clipId: string) => void;
+  addKeyframe: (clipId: string, keyframe: Keyframe) => void;
+  removeKeyframe: (clipId: string, keyframeId: string) => void;
   addTrack: (type: TrackType, label: string) => void;
   removeTrack: (trackId: string) => void;
   updateTrack: (trackId: string, updates: Partial<Track>) => void;
@@ -197,4 +199,40 @@ export const useProjectStore = create<ProjectState>((set) => ({
         updatedAt: Date.now(),
       },
     })),
+
+  addKeyframe: (clipId, keyframe) =>
+    set((state) => {
+      const clip = state.clips[clipId];
+      if (!clip || clip.kind === "media") return state;
+
+      const existing = clip.keyframes.filter(
+        (kf) =>
+          !(kf.property === keyframe.property && kf.time === keyframe.time),
+      );
+
+      return {
+        clips: {
+          ...state.clips,
+          [clipId]: { ...clip, keyframes: [...existing, keyframe] } as Clip,
+        },
+        project: { ...state.project, updatedAt: Date.now() },
+      };
+    }),
+
+  removeKeyframe: (clipId, keyframeId) =>
+    set((state) => {
+      const clip = state.clips[clipId];
+      if (!clip || clip.kind === "media") return state;
+
+      return {
+        clips: {
+          ...state.clips,
+          [clipId]: {
+            ...clip,
+            keyframes: clip.keyframes.filter((kf) => kf.id !== keyframeId),
+          } as Clip,
+        },
+        project: { ...state.project, updatedAt: Date.now() },
+      };
+    }),
 }));

@@ -1,0 +1,97 @@
+.section {
+  margin-bottom: 16px;
+}
+
+.sectionTitle {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.property {
+  margin-bottom: 8px;
+}
+
+.propertyHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.propertyLabel {
+  font-size: 11px;
+  color: var(--color-text);
+}
+
+.addBtn {
+  background: none;
+  border: none;
+  color: var(--color-accent);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
+.addBtn:hover {
+  background: var(--color-surface-alt);
+}
+
+.keyframeList {
+  padding-left: 8px;
+}
+
+.keyframeRow {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 3px;
+}
+
+.diamond {
+  font-size: 10px;
+  color: var(--color-accent);
+}
+
+.keyframeTime {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  min-width: 36px;
+}
+
+.keyframeValue {
+  font-size: 10px;
+  color: var(--color-text);
+  min-width: 36px;
+}
+
+.easingSelect {
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  color: var(--color-text);
+  font-size: 10px;
+  padding: 1px 2px;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+
+.removeBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+.removeBtn:hover {
+  color: #ff6666;
+}
