@@ -53,7 +53,11 @@ export class TimelineRenderer {
   private renderClips(ctx: CanvasRenderingContext2D, data: RenderData) {
     for (let i = 0; i < data.tracks.length; i++) {
       const track = data.tracks[i];
-      if (!track.visible) continue;
+      if (!track.visible) {
+        ctx.globalAlpha = 0.2;
+      } else {
+        ctx.globalAlpha = 1;
+      }
 
       const trackY = RULER_HEIGHT + i * TRACK_HEIGHT;
 
@@ -130,6 +134,7 @@ export class TimelineRenderer {
         }
       }
     }
+    ctx.globalAlpha = 1;
   }
 
   private renderThumbnails(
