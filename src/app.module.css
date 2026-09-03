@@ -1,8 +1,20 @@
 .layout {
   display: grid;
-  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr 240px;
+  grid-template-rows: auto 1fr auto auto;
+  grid-template-areas:
+    "toolbar toolbar"
+    "preview properties"
+    "playback playback"
+    "timeline timeline";
   height: 100%;
 }
+
+.layout > :nth-child(1) { grid-area: toolbar; }
+.layout > :nth-child(2) { grid-area: preview; }
+.layout > :nth-child(3) { grid-area: properties; }
+.layout > :nth-child(4) { grid-area: playback; }
+.layout > :nth-child(5) { grid-area: timeline; }
 
 .topbar {
   display: flex;
