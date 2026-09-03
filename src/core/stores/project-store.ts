@@ -1,5 +1,11 @@
 import { create } from "zustand";
-import type { Project, Asset, MediaClip, Clip } from "@/core/types/projects";
+import type {
+  Project,
+  Asset,
+  MediaClip,
+  Clip,
+  TrackType,
+} from "@/core/types/projects";
 import { generateId } from "@/core/utils/id-generator";
 
 type ProjectState = {
@@ -10,6 +16,7 @@ type ProjectState = {
   updateClip: (clipId: string, updates: Partial<Clip>) => void;
   splitClip: (clipId: string, splitTime: number) => void;
   removeClip: (clipId: string) => void;
+  addTrack: (type: TrackType, label: string) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -137,4 +144,24 @@ export const useProjectStore = create<ProjectState>((set) => ({
         project: { ...state.project, tracks: newTracks, updatedAt: Date.now() },
       };
     }),
+
+  addTrack: (type, label) =>
+    set((state) => ({
+      project: {
+        ...state.project,
+        tracks: [
+          ...state.project.tracks,
+          {
+            id: generateId(),
+            type,
+            label,
+            clips: [],
+            muted: false,
+            locked: false,
+            visible: true,
+          },
+        ],
+        updatedAt: Date.now(),
+      },
+    })),
 }));

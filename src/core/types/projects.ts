@@ -44,6 +44,7 @@ type Project = {
   assets: Asset[];
   createdAt: number;
   updatedAt: number;
+  resolution: Resolution;
 };
 
 type MediaClip = {

@@ -4,13 +4,20 @@ import { usePlaybackStore } from "@/core/stores/playback-store";
 import { readFileFromOpfs } from "@/core/storage/opfs-storage";
 import { usePlaybackEngine } from "./use-playback-engine";
 import { AssetImporter } from "../assets/asset-importer";
+import { renderOverlays } from "./overlay-renderer";
+import styles from "./styles/preview-canvas.module.css";
+import { useOverlayPlacement } from "./use-overlay-placement";
 
 export function PreviewCanvas() {
   const assets = useProjectStore((s) => s.project.assets);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const rafRef = useRef<number>(0);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
 
   usePlaybackEngine(videoRef);
+
+  const handleCanvasClick = useOverlayPlacement(canvasRef);
 
   const latestAsset = assets[assets.length - 1];
 
@@ -39,15 +46,76 @@ export function PreviewCanvas() {
     usePlaybackStore.getState().setDuration(video.duration);
   }, []);
 
+  useEffect(() => {
+    if (!latestAsset) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const loop = () => {
+      rafRef.current = requestAnimationFrame(loop);
+      if (!canvas.parentElement) return;
+
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const { project, clips } = useProjectStore.getState();
+      const { currentTime } = usePlaybackStore.getState();
+
+      const dpr = devicePixelRatio;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      const overlayTrackClipIds = project.tracks
+        .filter((t) => t.type === "overlay")
+        .flatMap((t) => t.clips);
+
+      renderOverlays(
+        ctx,
+        clips,
+        overlayTrackClipIds,
+        currentTime,
+        rect.width,
+        rect.height,
+        project.resolution.width,
+        project.resolution.height,
+      );
+
+      console.log(
+        "overlay clips:",
+        overlayTrackClipIds.length,
+        "time:",
+        currentTime,
+      );
+    };
+
+    rafRef.current = requestAnimationFrame(loop);
+
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [latestAsset?.id]);
+
   if (!latestAsset) {
     return <AssetImporter />;
   }
 
   return (
-    <video
-      ref={videoRef}
-      src={videoUrl ?? undefined}
-      onLoadedMetadata={handleLoadedMetadata}
-    />
+    <div className={styles.container}>
+      <video
+        ref={videoRef}
+        src={videoUrl ?? undefined}
+        onLoadedMetadata={handleLoadedMetadata}
+        className={styles.video}
+      />
+      <canvas
+        onClick={handleCanvasClick}
+        ref={canvasRef}
+        className={styles.overlay}
+      />
+    </div>
   );
 }
