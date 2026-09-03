@@ -11,23 +11,13 @@ import { gc } from "@/core/utils/logger";
 
 export function useTimelineKeyboard() {
   useEffect(() => {
-    gc.log(
-      "keyboard hook mounted and the cursor is here this file name is timeline keyboard.ts",
-    );
-
     const handleKeyDown = (e: KeyboardEvent) => {
-      gc.log(
-        "Hello, key:",
-        e.key,
-        "ctrl:",
-        e.ctrlKey,
-        "meta:",
-        e.metaKey,
-        "shift:",
-        e.shiftKey,
-      );
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
       const { selectedClipIds } = useSelectionStore.getState();
+      gc.log("selected clid ids", selectedClipIds);
+
       const { dispatch, undo, redo } = useHistoryStore.getState();
 
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
@@ -42,11 +32,39 @@ export function useTimelineKeyboard() {
         return;
       }
 
+      if (e.key === " ") {
+        e.preventDefault();
+        usePlaybackStore.getState().togglePlayback();
+        return;
+      }
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        const { currentTime } = usePlaybackStore.getState();
+        const step = e.shiftKey ? 5 : 1;
+        usePlaybackStore
+          .getState()
+          .setCurrentTime(Math.max(0, currentTime - step));
+        return;
+      }
+
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        const { currentTime, duration } = usePlaybackStore.getState();
+        const step = e.shiftKey ? 5 : 1;
+        usePlaybackStore
+          .getState()
+          .setCurrentTime(Math.min(duration, currentTime + step));
+        return;
+      }
+
       if (e.key === "s" && !e.ctrlKey && !e.metaKey) {
         if (selectedClipIds.size !== 1) return;
         const clipId = [...selectedClipIds][0];
         const clip = useProjectStore.getState().clips[clipId];
+
         if (!clip) return;
+
         const currentTime = usePlaybackStore.getState().currentTime;
         if (
           currentTime <= clip.startTime ||
@@ -58,6 +76,7 @@ export function useTimelineKeyboard() {
 
       if (e.key === "Delete" || e.key === "Backspace") {
         if (selectedClipIds.size === 0) return;
+
         const { clips } = useProjectStore.getState();
         for (const clipId of selectedClipIds) {
           const clip = clips[clipId];
