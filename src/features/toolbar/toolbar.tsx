@@ -13,7 +13,7 @@ const TOOLS: { tool: Tool; label: string }[] = [
   { tool: "arrow", label: "Arrow" },
 ];
 
-export function Toolbar() {
+export function Toolbar({ onBack }: { onBack: () => void }) {
   const activeTool = useSelectionStore((s) => s.activeTool);
   const [showExport, setShowExport] = useState(false);
 
@@ -24,6 +24,13 @@ export function Toolbar() {
   return (
     <>
       <div className={styles.toolbar}>
+        <button
+          className={styles.backBtn}
+          onClick={onBack}
+          title="Back to projects"
+        >
+          {"<-"}
+        </button>
         <span className={styles.logo}>Wispr</span>
         <div className={styles.tools}>
           {TOOLS.map(({ tool, label }) => (

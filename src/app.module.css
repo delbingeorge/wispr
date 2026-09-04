@@ -66,3 +66,24 @@
   flex: 1;
   min-width: 0;
 }
+
+.loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.warning {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #5a3a3a;
+  color: #ff9999;
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 4px;
+}

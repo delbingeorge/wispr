@@ -22,6 +22,7 @@ type ProjectState = {
   addTrack: (type: TrackType, label: string) => void;
   removeTrack: (trackId: string) => void;
   updateTrack: (trackId: string, updates: Partial<Track>) => void;
+  resetProject: (id: string) => void;
 };
 
 export const useProjectStore = create<ProjectState>((set) => ({
@@ -234,5 +235,30 @@ export const useProjectStore = create<ProjectState>((set) => ({
         },
         project: { ...state.project, updatedAt: Date.now() },
       };
+    }),
+
+  resetProject: (id) =>
+    set({
+      project: {
+        id,
+        name: "Untitled",
+        resolution: { width: 1920, height: 1080 },
+        fps: 30,
+        tracks: [
+          {
+            id: generateId(),
+            type: "video",
+            label: "Video",
+            clips: [],
+            muted: false,
+            locked: false,
+            visible: true,
+          },
+        ],
+        assets: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      },
+      clips: {},
     }),
 }));
