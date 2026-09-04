@@ -4,6 +4,7 @@ import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useHistoryStore } from "@/core/stores/history-store";
 import { formatTimecode } from "@/core/utils/time-format";
 import styles from "./styles/playback-control.module.css";
+import { Play } from "@/assets/icons";
 
 const RATES = [0.25, 0.5, 1, 1.5, 2];
 
@@ -72,7 +73,7 @@ export function PlaybackControls() {
           onClick={handleTogglePlay}
           title={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? "Pause Icon" : "Play Icon"}
+          {isPlaying ? "Pause Icon" : <Play />}
         </button>
         <button
           className={styles.btn}
