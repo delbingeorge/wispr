@@ -1,11 +1,21 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import type { Track, TrackType } from "@/core/types/projects";
 import styles from "./styles/track-sidebar.module.css";
+import {
+  Eye,
+  EyeOff,
+  Film,
+  Lock,
+  Trash,
+  Unlock,
+  VolumeMute,
+} from "@/assets/icons";
+import type { ReactElement } from "react";
 
-const TRACK_ICONS: Record<TrackType, string> = {
-  overlay: "O",
-  video: "V",
-  audio: "A",
+const TRACK_ICONS: Record<TrackType, ReactElement> = {
+  overlay: <></>, // do later
+  video: <Film />,
+  audio: <></>,
 };
 
 export function TrackSidebar() {
@@ -49,7 +59,7 @@ export function TrackSidebar() {
               onClick={() => handleToggleVisibility(track)}
               title={track.visible ? "Hide" : "Show"}
             >
-              {track.visible ? "Eye Close" : "Eye Open"}
+              {track.visible ? <EyeOff /> : <Eye />}
             </button>
             {track.type === "audio" ? (
               <button
@@ -57,7 +67,7 @@ export function TrackSidebar() {
                 onClick={() => handleToggleMute(track)}
                 title={track.muted ? "Unmute" : "Mute"}
               >
-                {track.muted ? "Mute" : "Unmute"}
+                {track.muted ? <VolumeMute /> : "Unmute"}
               </button>
             ) : null}
             <button
@@ -65,14 +75,14 @@ export function TrackSidebar() {
               onClick={() => handleToggleLock(track)}
               title={track.locked ? "Unlock" : "Lock"}
             >
-              {track.locked ? "Lock" : "Unlock"}
+              {track.locked ? <Lock /> : <Unlock />}
             </button>
             <button
               className={styles.btn}
               onClick={() => handleRemoveTrack(track.id)}
               title="Delete track"
             >
-              Bin
+              <Trash />
             </button>
           </div>
         </div>

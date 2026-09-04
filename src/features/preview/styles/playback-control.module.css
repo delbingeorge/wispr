@@ -2,7 +2,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
+  height: 70px;
+  gap: 10px;
   padding: 0 12px;
   background: var(--color-surface);
   border-top: 1px solid var(--color-border);
@@ -19,7 +20,7 @@
 .center {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
 }
 
 .right {
@@ -41,34 +42,41 @@
 
 .timeDisplay {
   font-size: 12px;
-  color: var(--color-text-muted);
+  color: var(--white);
   font-variant-numeric: tabular-nums;
 }
 
 .btn {
-  background: none;
-  border: none;
-  color: var(--color-text);
-  font-size: 14px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: transparent;
+  color: var(--ink);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
+  padding: 5px;
 }
 
 .btn:hover {
   background: var(--color-surface-alt);
 }
 
-.btnPlay {
-  background: none;
-  border: none;
-  color: var(--color-text);
-  font-size: 18px;
+.speedChip {
+  min-width: 34px;
+  height: 24px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink-2);
   cursor: pointer;
-  padding: 4px 10px;
-  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: -0.2px;
+  margin-left: 4px;
 }
 
-.btnPlay:hover {
-  background: var(--color-surface-alt);
+.timeCode {
+  color: var(--color-text-muted);
 }

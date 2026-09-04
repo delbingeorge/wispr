@@ -16,7 +16,7 @@ import { generateId } from "./core/utils/id-generator";
 
 export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const { loading, found, missingAssets } = useProjectLoader(activeProjectId);
+  const { loading, missingAssets } = useProjectLoader(activeProjectId);
 
   const handleNewProject = useCallback(() => {
     const id = generateId();

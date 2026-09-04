@@ -4,7 +4,7 @@ import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useHistoryStore } from "@/core/stores/history-store";
 import { formatTimecode } from "@/core/utils/time-format";
 import styles from "./styles/playback-control.module.css";
-import { Play } from "@/assets/icons";
+import { FastForward, Next, Pause, Play, Redo, Undo } from "@/assets/icons";
 
 const RATES = [0.25, 0.5, 1, 1.5, 2];
 
@@ -59,54 +59,55 @@ export function PlaybackControls() {
           onClick={handleSeekStart}
           title="Skip to start"
         >
-          {"<<"}
+          <FastForward style={{ transform: "rotate(180deg" }} />
         </button>
         <button
           className={styles.btn}
           onClick={handleStepBack}
           title="Step back"
         >
-          {"<"}
+          <Next style={{ transform: "rotate(180deg" }} />
         </button>
         <button
-          className={styles.btnPlay}
+          className={styles.btn}
           onClick={handleTogglePlay}
           title={isPlaying ? "Pause" : "Play"}
         >
-          {isPlaying ? "Pause Icon" : <Play />}
+          {isPlaying ? <Pause /> : <Play />}
         </button>
         <button
           className={styles.btn}
           onClick={handleStepForward}
           title="Step forward"
         >
-          {">"}
+          <Next />
         </button>
         <button
           className={styles.btn}
           onClick={handleSeekEnd}
           title="Skip to end"
         >
-          {">>"}
+          <FastForward />
         </button>
-      </div>
-
-      <div className={styles.right}>
         <button
-          className={styles.btn}
+          className={styles.speedChip}
           onClick={handleRateCycle}
           title="Playback rate"
         >
           {playbackRate}×
         </button>
         <span className={styles.timeDisplay}>
-          {formatTimecode(currentTime)} / {formatTimecode(duration)}
+          {formatTimecode(currentTime)} /{" "}
+          <span className={styles.timeCode}>{formatTimecode(duration)}</span>
         </span>
+      </div>
+
+      <div className={styles.right}>
         <button className={styles.btn} onClick={handleUndo} title="Undo">
-          undo
+          <Undo />
         </button>
         <button className={styles.btn} onClick={handleRedo} title="Redo">
-          redo
+          <Redo />
         </button>
       </div>
     </div>
