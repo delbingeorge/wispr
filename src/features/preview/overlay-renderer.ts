@@ -6,7 +6,6 @@ import type {
 } from "@/core/types/projects";
 import { resolveProperty } from "@/core/utils/keyframe-interpolation";
 import { HANDLE_SIZE, ROTATE_OFFSET } from "./overlay-hit-test";
-import { gc } from "the-good-console";
 
 type ResolvedProps = {
   x: number;
@@ -226,7 +225,6 @@ function renderShapeClip(
       break;
 
     case "ellipse":
-      gc.log("ell pressed");
       ctx.beginPath();
       ctx.ellipse(0, 0, r.width / 2, r.height / 2, 0, 0, Math.PI * 2);
       ctx.fill();
@@ -234,8 +232,6 @@ function renderShapeClip(
       break;
 
     case "line":
-      gc.log("line pressed");
-
       ctx.beginPath();
       ctx.moveTo(-r.width / 2, 0);
       ctx.lineTo(r.width / 2, 0);

@@ -1,4 +1,3 @@
-import { gc } from "the-good-console";
 import type { Keyframe } from "../types/projects";
 import { applyEasing } from "./easing";
 
@@ -8,7 +7,7 @@ export function resolveProperty(
   keyframes: Keyframe[],
   clipTime: number,
 ): number {
-  gc.log("please work, ", property, baseValue, clipTime);
+  console.log("please work, ", property, baseValue, clipTime);
 
   const relevant = keyframes
     .filter((kf) => kf.property === property)

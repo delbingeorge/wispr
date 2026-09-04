@@ -37,3 +37,34 @@
   background: var(--color-surface-alt);
   color: var(--color-text);
 }
+
+.exportBtn {
+  margin-left: auto;
+  background: var(--color-accent);
+  border: none;
+  color: #000;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.exportBtn:hover {
+  opacity: 0.9;
+}
+
+.backBtn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.backBtn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
+}

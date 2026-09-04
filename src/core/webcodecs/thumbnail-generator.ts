@@ -1,5 +1,3 @@
-import { gc } from "@/core/utils/logger";
-
 type ThumbnailCache = Map<string, ImageBitmap>;
 
 const cache: ThumbnailCache = new Map();
@@ -37,7 +35,6 @@ export function generateThumbnails(
   const w = getWorker();
 
   const handler = (e: MessageEvent) => {
-    gc.log("worker message:", e.data.type);
     if (e.data.type === "thumbnail") {
       const key = cacheKey(assetId, e.data.timestamp);
       const existing = cache.get(key);
