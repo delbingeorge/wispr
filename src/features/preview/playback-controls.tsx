@@ -5,6 +5,7 @@ import { useHistoryStore } from "@/core/stores/history-store";
 import { formatTimecode } from "@/core/utils/time-format";
 import styles from "./styles/playback-control.module.css";
 import { FastForward, Next, Pause, Play, Redo, Undo } from "@/assets/icons";
+import glass from "../../styles/glass.module.css";
 
 const RATES = [0.25, 0.5, 1, 1.5, 2];
 
@@ -48,7 +49,7 @@ export function PlaybackControls() {
   const handleRedo = () => useHistoryStore.getState().redo();
 
   return (
-    <div className={styles.controls}>
+    <div className={`${styles.controls} ${glass.panel}`}>
       <div className={styles.left}>
         <span className={styles.timeBadge}>{formatTimecode(currentTime)}</span>
       </div>

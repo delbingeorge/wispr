@@ -5,6 +5,7 @@ import {
   type SavedProject,
 } from "@/core/storage/project-storage";
 import styles from "./styles/home-screen.module.css";
+import grads from "../../styles/gradients.module.css";
 
 type Props = {
   onOpenProject: (projectId: string) => void;
@@ -43,14 +44,14 @@ export function HomeScreen({ onOpenProject, onNewProject }: Props) {
 
   if (loading) {
     return (
-      <div className={styles.container}>
+      <div className={`${styles.container} ${grads.atmosphere}`}>
         <span className={styles.loading}>Loading projects...</span>
       </div>
     );
   }
 
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${grads.atmosphere}`}>
       <div className={styles.header}>
         <h1 className={styles.title}>Wispr</h1>
         <button className={styles.newBtn} onClick={onNewProject}>

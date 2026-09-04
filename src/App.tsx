@@ -63,7 +63,7 @@ function Editor({
   return (
     <div className={`${styles.layout} ${grads.atmosphere}`}>
       <Toolbar onBack={onBack} />
-      <div className={styles.preview}>
+      <div className={`${styles.preview} ${grads.canvas}`}>
         <PreviewCanvas />
         {missingAssets.length > 0 && (
           <div className={styles.warning}>

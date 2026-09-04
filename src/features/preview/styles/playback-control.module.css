@@ -5,9 +5,9 @@
   height: 70px;
   gap: 10px;
   padding: 0 12px;
-  background: var(--color-surface);
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  background: rgba(28, 24, 24, 0.55);
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .left {

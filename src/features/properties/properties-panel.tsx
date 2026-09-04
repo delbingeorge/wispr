@@ -1,6 +1,7 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
 import styles from "./styles/properties-panel.module.css";
+import glass from "../../styles/glass.module.css";
 import { KeyframeSection } from "./keyframe-section";
 
 export function PropertiesPanel() {
@@ -9,7 +10,7 @@ export function PropertiesPanel() {
 
   if (selectedClipIds.size !== 1) {
     return (
-      <div className={styles.panel}>
+      <div className={`${styles.panel} ${glass.panel}`}>
         <span className={styles.empty}>Select an overlay to edit</span>
       </div>
     );
@@ -20,7 +21,7 @@ export function PropertiesPanel() {
 
   if (!clip || clip.kind === "media") {
     return (
-      <div className={styles.panel}>
+      <div className={`${styles.panel} ${glass.panel}`}>
         <span className={styles.empty}>Select an overlay to edit</span>
       </div>
     );
@@ -35,7 +36,7 @@ export function PropertiesPanel() {
   const p = clip.properties;
 
   return (
-    <div className={styles.panel}>
+    <div className={`${styles.panel} ${glass.panel}`}>
       <div className={styles.section}>
         <span className={styles.sectionTitle}>Position</span>
         <div className={styles.row}>
