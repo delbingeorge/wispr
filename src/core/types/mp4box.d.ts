@@ -32,6 +32,22 @@ declare module "mp4box" {
     fileStart: number;
   }
 
+  interface AddTrackOptions {
+    timescale?: number;
+    width?: number;
+    height?: number;
+    nb_samples?: number;
+    codec?: string;
+    avcDecoderConfigRecord?: ArrayBuffer;
+  }
+
+  interface AddSampleOptions {
+    duration: number;
+    is_sync: boolean;
+    cts?: number;
+    dts?: number;
+  }
+
   interface ISOFile {
     onReady: ((info: MP4Info) => void) | null;
     onError: ((error: Error) => void) | null;
@@ -49,6 +65,14 @@ declare module "mp4box" {
     ) => void;
     start: () => void;
     getTrackById: (trackId: number) => MP4BoxTrack;
+    addTrack: (options: AddTrackOptions) => number;
+    addSample: (
+      trackId: number,
+      data: ArrayBuffer,
+      options: AddSampleOptions,
+    ) => void;
+    getBuffer: () => ArrayBuffer;
+    save: (filename: string) => void;
   }
 
   interface MP4BoxEntry {
@@ -88,9 +112,7 @@ declare module "mp4box" {
   }
 
   const DataStream: DataStreamConstructor;
-
   function createFile(): ISOFile;
-
   export {
     createFile,
     DataStream,
@@ -99,5 +121,7 @@ declare module "mp4box" {
     MP4Sample,
     MP4ArrayBuffer,
     ISOFile,
+    AddTrackOptions,
+    AddSampleOptions,
   };
 }

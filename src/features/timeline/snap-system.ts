@@ -1,5 +1,4 @@
 import type { Clip } from "@/core/types/projects";
-import { gc } from "@/core/utils/logger";
 
 const SNAP_THRESHOLD_PX = 8;
 
@@ -29,11 +28,8 @@ export function findSnapTarget(
   let snapLine: number | null = null;
 
   for (const target of targets) {
-    gc.log("cursor reached here");
     const distance = Math.abs(candidateTime - target);
     if (distance < minDistance) {
-      gc.log("cursor reached inside condition");
-
       minDistance = distance;
       closest = target;
       snapLine = target;

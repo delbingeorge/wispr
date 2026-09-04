@@ -7,7 +7,6 @@ import {
   createSplitCommand,
   createDeleteCommand,
 } from "@/core/commands/clip-commands";
-import { gc } from "@/core/utils/logger";
 
 export function useTimelineKeyboard() {
   useEffect(() => {
@@ -16,7 +15,6 @@ export function useTimelineKeyboard() {
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
 
       const { selectedClipIds } = useSelectionStore.getState();
-      gc.log("selected clid ids", selectedClipIds);
 
       const { dispatch, undo, redo } = useHistoryStore.getState();
 

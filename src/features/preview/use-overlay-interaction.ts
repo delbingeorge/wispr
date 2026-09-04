@@ -5,7 +5,6 @@ import { useSelectionStore } from "@/core/stores/selection-store";
 import { hitTestOverlays, type ResizeHandle } from "./overlay-hit-test";
 import { generateId } from "../../core/utils/id-generator";
 import type { TextClip, ShapeClip, ShapeType } from "../../core/types/projects";
-import { gc } from "the-good-console";
 
 type DragState = {
   type: "move" | "resize" | "rotate";
@@ -27,8 +26,6 @@ export function useOverlayInteraction(
 
   const toProjectCoords = useCallback(
     (e: React.MouseEvent) => {
-      gc.log("cursor is inside user over hook");
-
       const canvas = canvasRef.current;
       if (!canvas) return null;
       const rect = canvas.getBoundingClientRect();

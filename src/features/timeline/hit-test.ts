@@ -1,7 +1,6 @@
 import type { Clip, Track } from "@/core/types/projects";
 import { pixelToTime } from "@/core/utils/time-coordinate";
 import { RULER_HEIGHT, TRACK_HEIGHT } from "./timeline-renderer";
-import { gc } from "@/core/utils/logger";
 
 const TRIM_HANDLE_WIDTH = 8;
 
@@ -34,7 +33,6 @@ export function hitTest(
 
   if (trackIndex < 0 || trackIndex >= tracks.length) {
     const time = pixelToTime(mouseX, zoom, scrollX);
-    gc.log("this is the time: ", time);
 
     return { type: "empty", trackIndex: Math.max(0, trackIndex), time };
   }
@@ -43,7 +41,6 @@ export function hitTest(
   const time = pixelToTime(mouseX, zoom, scrollX);
 
   for (const clipId of track.clips) {
-    gc.log("cursor was here 1");
     const clip = clips[clipId];
     if (!clip) continue;
 
