@@ -14,6 +14,8 @@ import { useProjectLoader } from "./core/hooks/use-project-loader";
 import { useProjectStore } from "./core/stores/project-store";
 import { generateId } from "./core/utils/id-generator";
 
+import grads from "./styles/gradients.module.css";
+
 export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const { loading, missingAssets } = useProjectLoader(activeProjectId);
@@ -59,7 +61,7 @@ function Editor({
   useAutoSave();
 
   return (
-    <div className={styles.layout}>
+    <div className={`${styles.layout} ${grads.atmosphere}`}>
       <Toolbar onBack={onBack} />
       <div className={styles.preview}>
         <PreviewCanvas />

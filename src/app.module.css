@@ -31,7 +31,6 @@
   align-items: center;
   height: 40px;
   padding: 0 12px;
-  background: var(--color-surface);
   border-bottom: 1px solid var(--color-border);
 }
 
@@ -40,7 +39,6 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  background: #000;
 }
 
 .preview video {
