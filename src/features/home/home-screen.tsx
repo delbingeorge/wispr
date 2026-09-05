@@ -5,8 +5,6 @@ import {
   type SavedProject,
 } from "@/core/storage/project-storage";
 import styles from "./styles/home-screen.module.css";
-import grads from "../../styles/gradients.module.css";
-import glass from "../../styles/glass.module.css";
 import { Logo, Search, MoreDots, Close, Warning, Check } from "@/assets/icons";
 
 type ProjectCard = Omit<SavedProject, "clips"> & {
@@ -130,15 +128,15 @@ export function HomeScreen({ onOpenProject, onNewProject }: Props) {
 
   if (loading) {
     return (
-      <div className={`${styles.container} ${grads.atmosphere}`}>
+<div className={styles.container}>
         <span className={styles.loading}>Loading projects...</span>
       </div>
     );
   }
 
   return (
-    <div className={`${styles.container} ${grads.atmosphere}`}>
-      <header className={`${styles.bar} ${glass.heavy}`}>
+    <div className={styles.container}>
+      <header className={styles.bar}>
         <span className={styles.logo} aria-label="Wisp">
           <Logo />
         </span>

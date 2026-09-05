@@ -80,8 +80,6 @@
   display: grid;
   place-items: center;
   background: rgba(16, 13, 13, 0.72);
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
   pointer-events: none;
 }
 

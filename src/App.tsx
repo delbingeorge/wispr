@@ -14,7 +14,6 @@ import { useProjectLoader } from "./core/hooks/use-project-loader";
 import { useProjectStore } from "./core/stores/project-store";
 import { generateId } from "./core/utils/id-generator";
 
-import grads from "./styles/gradients.module.css";
 import { ToastContainer } from "./features/ui/toast";
 
 export default function App() {
@@ -75,9 +74,9 @@ function Editor({
   useAutoSave();
 
   return (
-    <div className={`${styles.layout} ${grads.atmosphere}`}>
+    <div className={styles.layout}>
       <Toolbar onBack={onBack} />
-      <div className={`${styles.preview} ${grads.canvas}`}>
+      <div className={styles.preview}>
         <PreviewCanvas />
         {missingAssets.length > 0 && (
           <div className={styles.warning}>

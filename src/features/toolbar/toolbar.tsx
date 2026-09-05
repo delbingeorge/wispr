@@ -3,8 +3,6 @@ import type { Tool } from "@/core/stores/selection-store";
 import styles from "./styles/toolbar.module.css";
 import { useState } from "react";
 import { ExportDialog } from "../export/export-dialog";
-import glass from "../../styles/glass.module.css";
-import grads from "../../styles/gradients.module.css";
 
 const TOOLS: { tool: Tool; label: string }[] = [
   { tool: "select", label: "Select" },
@@ -25,7 +23,7 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
 
   return (
     <>
-      <div className={`${styles.toolbar} ${glass.panel} ${grads.toolbar}`}>
+      <div className={styles.toolbar}>
         <button
           className={styles.backBtn}
           onClick={onBack}
