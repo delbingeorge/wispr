@@ -1,0 +1,104 @@
+.container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: black;
+  height: 100%;
+  width: 100%;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 34px 52px;
+  height: 100%;
+  width: 100%;
+  border: none;
+  outline: none;
+  text-align: center;
+  background: none;
+  cursor: pointer;
+  transition:
+    transform 0.12s ease-out,
+    background 0.12s ease-out,
+    border-color 0.12s ease-out;
+  color: var(--ink);
+}
+
+.card:focus-visible {
+  outline: 2px solid rgba(238, 255, 136, 0.55);
+  outline-offset: 3px;
+}
+
+.cardDragging {
+  background: rgba(238, 255, 136, 0.12);
+  border-color: var(--accent);
+  transform: scale(1.02);
+}
+
+.cardDisabled {
+  cursor: progress;
+  opacity: 0.65;
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  color: var(--accent);
+  display: grid;
+  place-items: center;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.sub {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropOverlay {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 13, 13, 0.72);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.dropOverlayCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 34px 52px;
+  border-radius: 16px;
+  border: 1.5px dashed rgba(238, 255, 136, 0.85);
+  background: rgba(238, 255, 136, 0.1);
+  text-align: center;
+  color: var(--ink);
+}
+
+.dropOverlayCard .icon {
+  width: 22px;
+  height: 22px;
+}

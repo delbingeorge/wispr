@@ -15,6 +15,7 @@ import { useProjectStore } from "./core/stores/project-store";
 import { generateId } from "./core/utils/id-generator";
 
 import grads from "./styles/gradients.module.css";
+import { ToastContainer } from "./features/ui/toast";
 
 export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
@@ -36,18 +37,31 @@ export default function App() {
 
   if (!activeProjectId) {
     return (
-      <HomeScreen
-        onOpenProject={handleOpenProject}
-        onNewProject={handleNewProject}
-      />
+      <>
+        <HomeScreen
+          onOpenProject={handleOpenProject}
+          onNewProject={handleNewProject}
+        />
+        <ToastContainer />
+      </>
     );
   }
 
   if (loading) {
-    return <div className={styles.loading}>Loading project...</div>;
+    return (
+      <>
+        <div className={styles.loading}>Loading project...</div>
+        <ToastContainer />
+      </>
+    );
   }
 
-  return <Editor missingAssets={missingAssets} onBack={handleBackToHome} />;
+  return (
+    <>
+      <Editor missingAssets={missingAssets} onBack={handleBackToHome} />
+      <ToastContainer />
+    </>
+  );
 }
 
 function Editor({
