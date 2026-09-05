@@ -6,16 +6,19 @@ import {
   EyeOff,
   Film,
   Lock,
+  Music,
+  Plus,
   Trash,
   Unlock,
+  Volume,
   VolumeMute,
 } from "@/assets/icons";
 import type { ReactElement } from "react";
 
 const TRACK_ICONS: Record<TrackType, ReactElement> = {
-  overlay: <></>, // do later
+  overlay: <Plus />,
   video: <Film />,
-  audio: <></>,
+  audio: <Music />,
 };
 
 export function TrackSidebar() {
@@ -47,46 +50,64 @@ export function TrackSidebar() {
 
   return (
     <div className={styles.sidebar}>
-      {tracks.map((track) => (
-        <div key={track.id} className={styles.track}>
-          <div className={styles.trackInfo}>
-            <span className={styles.icon}>{TRACK_ICONS[track.type]}</span>
-            <span className={styles.label}>{track.label}</span>
-          </div>
-          <div className={styles.controls}>
+      {tracks.map((track) => {
+        const isAudio = track.type === "audio";
+        const hidden = !isAudio && !track.visible;
+
+        return (
+          <div
+            key={track.id}
+            className={`${styles.track} ${hidden ? styles.trackOff : ""}`}
+            data-track={track.id}
+          >
+            <span className={styles.trackIcon}>{TRACK_ICONS[track.type]}</span>
+            <span className={styles.trackLabel}>{track.label}</span>
+
             <button
-              className={`${styles.btn} ${!track.visible ? styles.inactive : ""}`}
-              onClick={() => handleToggleVisibility(track)}
-              title={track.visible ? "Hide" : "Show"}
+              className={`${styles.btn} ${styles.btnAdd}`}
+              title={`Add to ${track.label}`}
+              disabled={track.locked}
             >
-              {track.visible ? <EyeOff /> : <Eye />}
+              <Plus />
             </button>
-            {track.type === "audio" ? (
+
+            {isAudio ? (
               <button
-                className={`${styles.btn} ${track.muted ? styles.inactive : ""}`}
+                className={styles.btn}
                 onClick={() => handleToggleMute(track)}
                 title={track.muted ? "Unmute" : "Mute"}
               >
-                {track.muted ? <VolumeMute /> : "Unmute"}
+                {track.muted ? <VolumeMute /> : <Volume />}
               </button>
-            ) : null}
+            ) : (
+              <button
+                className={styles.btn}
+                onClick={() => handleToggleVisibility(track)}
+                title={track.visible ? "Hide" : "Show"}
+              >
+                {track.visible ? <Eye /> : <EyeOff />}
+              </button>
+            )}
+
             <button
-              className={`${styles.btn} ${track.locked ? styles.inactive : ""}`}
+              className={`${styles.btn} ${track.locked ? styles.btnOn : ""}`}
               onClick={() => handleToggleLock(track)}
               title={track.locked ? "Unlock" : "Lock"}
             >
               {track.locked ? <Lock /> : <Unlock />}
             </button>
+
             <button
               className={styles.btn}
               onClick={() => handleRemoveTrack(track.id)}
-              title="Delete track"
+              title={`Remove ${track.label}`}
             >
               <Trash />
             </button>
           </div>
-        </div>
-      ))}
+        );
+      })}
+
       <button className={styles.addTrack} onClick={handleAddTrack}>
         + Add track
       </button>

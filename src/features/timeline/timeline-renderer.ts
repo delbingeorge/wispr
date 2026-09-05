@@ -34,17 +34,24 @@ export class TimelineRenderer {
   }
 
   private renderTrackLanes(ctx: CanvasRenderingContext2D, data: RenderData) {
+    const lanesTop = RULER_HEIGHT;
+    const lanesHeight = data.tracks.length * TRACK_HEIGHT;
+
+    const grad = ctx.createLinearGradient(0, 0, data.width, 0);
+    grad.addColorStop(0.012, "#302a2b");
+    grad.addColorStop(0.099, "#332a2b");
+    grad.addColorStop(0.248, "#372d2d");
+    grad.addColorStop(0.413, "#392c2d");
+    grad.addColorStop(0.578, "#362d2d");
+    grad.addColorStop(0.743, "#302c2d");
+    grad.addColorStop(0.867, "#2d2b2c");
+    grad.addColorStop(0.988, "#2b292c");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, lanesTop, data.width, lanesHeight);
+
     for (let i = 0; i < data.tracks.length; i++) {
       const y = RULER_HEIGHT + i * TRACK_HEIGHT;
-      const track = data.tracks[i];
-      ctx.fillStyle = !track.visible
-        ? "#161616"
-        : i % 2 === 0
-          ? "#1e1e1e"
-          : "#242424";
-      ctx.fillRect(0, y, data.width, TRACK_HEIGHT);
-
-      ctx.fillStyle = "#3a3a3a";
+      ctx.fillStyle = "rgba(255,255,255,0.025)";
       ctx.fillRect(0, y + TRACK_HEIGHT - 1, data.width, 1);
     }
   }
