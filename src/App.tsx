@@ -8,7 +8,7 @@ import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 import { Toolbar } from "./features/toolbar/toolbar";
 import { useAutoSave } from "./core/hooks/use-auto-save";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { HomeScreen } from "./features/home/home-screen";
 import { useProjectLoader } from "./core/hooks/use-project-loader";
 import { useProjectStore } from "./core/stores/project-store";
@@ -72,6 +72,7 @@ function Editor({
 }) {
   useTimelineKeyboard();
   useAutoSave();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   return (
     <div className={styles.layout}>
@@ -88,9 +89,9 @@ function Editor({
       <PropertiesPanel />
       <PlaybackControls />
       <div className={styles.timelineArea}>
-        <TrackSidebar />
+        <TrackSidebar canvasRef={canvasRef} />
         <div className={styles.timeline}>
-          <TimelineCanvas />
+          <TimelineCanvas canvasRef={canvasRef} />
         </div>
       </div>
     </div>

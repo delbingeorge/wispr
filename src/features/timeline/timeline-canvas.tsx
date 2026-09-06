@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from "react";
+import type { RefObject } from "react";
 import { useProjectStore } from "@/core/stores/project-store";
 import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useTimelineStore } from "@/core/stores/timeline-store";
@@ -6,8 +7,11 @@ import { useSelectionStore } from "@/core/stores/selection-store";
 import { pixelToTime } from "@/core/utils/time-coordinate";
 import { hitTest } from "./hit-test";
 import { getThumbnail } from "@/core/webcodecs/thumbnail-generator";
-import { TimelineRenderer, RULER_HEIGHT } from "./timeline-renderer";
+import { TimelineRenderer } from "./timeline-renderer";
+import { RULER_HEIGHT } from "./track-layout";
+import { setOnIconReady } from "./canvas-icon-cache";
 import { findSnapTarget } from "./snap-system";
+import { useTimelineWheel } from "./use-timeline-wheel";
 import { useHistoryStore } from "@/core/stores/history-store";
 import {
   createMoveCommand,
@@ -25,11 +29,15 @@ type DragState = {
   originalInPoint: number;
 };
 
-export function TimelineCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+export function TimelineCanvas({
+  canvasRef,
+}: {
+  canvasRef: RefObject<HTMLCanvasElement | null>;
+}) {
   const dirtyRef = useRef(true);
   const rafRef = useRef<number>(0);
   const dragRef = useRef<DragState | null>(null);
+  const draggingPlayheadRef = useRef(false);
   const snapLineRef = useRef<number | null>(null);
 
   const markDirty = useCallback(() => {
@@ -44,6 +52,10 @@ export function TimelineCanvas() {
       useSelectionStore.subscribe(markDirty),
     ];
     return () => unsubs.forEach((fn) => fn());
+  }, [markDirty]);
+
+  useEffect(() => {
+    setOnIconReady(markDirty);
   }, [markDirty]);
 
   useEffect(() => {
@@ -73,6 +85,7 @@ export function TimelineCanvas() {
         renderer.render(ctx, {
           zoom: useTimelineStore.getState().zoom,
           scrollX: useTimelineStore.getState().scrollX,
+          scrollY: useTimelineStore.getState().scrollY,
           currentTime: usePlaybackStore.getState().currentTime,
           tracks: useProjectStore.getState().project.tracks,
           clips: useProjectStore.getState().clips,
@@ -98,36 +111,9 @@ export function TimelineCanvas() {
       observer.disconnect();
       cancelAnimationFrame(rafRef.current);
     };
-  }, []);
+  }, [canvasRef]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      const { zoom, scrollX, setZoom, setScrollX } =
-        useTimelineStore.getState();
-
-      if (e.ctrlKey || e.metaKey) {
-        const newZoom = Math.max(
-          10,
-          Math.min(1000, zoom * (1 - e.deltaY * 0.005)),
-        );
-        const rect = canvas.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const timeAtMouse = (mouseX + scrollX) / zoom;
-        const newScrollX = timeAtMouse * newZoom - mouseX;
-        setZoom(newZoom);
-        setScrollX(Math.max(0, newScrollX));
-      } else {
-        setScrollX(Math.max(0, scrollX + e.deltaX + e.deltaY));
-      }
-    };
-
-    canvas.addEventListener("wheel", onWheel, { passive: false });
-    return () => canvas.removeEventListener("wheel", onWheel);
-  }, []);
+  useTimelineWheel(canvasRef, canvasRef);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -137,19 +123,24 @@ export function TimelineCanvas() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
 
-    const { zoom, scrollX } = useTimelineStore.getState();
+    const { zoom, scrollX, scrollY } = useTimelineStore.getState();
     const { project, clips } = useProjectStore.getState();
+    const currentTime = usePlaybackStore.getState().currentTime;
 
     const result = hitTest(
       mouseX,
       mouseY,
       zoom,
       scrollX,
+      scrollY,
+      currentTime,
       project.tracks,
       clips,
     );
 
-    if (result.type === "ruler") {
+    if (result.type === "playheadGrip") {
+      draggingPlayheadRef.current = true;
+    } else if (result.type === "ruler") {
       usePlaybackStore.getState().setCurrentTime(result.time);
       useSelectionStore.getState().deselectAll();
     } else if (result.type === "clip") {
@@ -171,7 +162,7 @@ export function TimelineCanvas() {
     } else {
       useSelectionStore.getState().deselectAll();
     }
-  }, []);
+  }, [canvasRef]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const canvas = canvasRef.current;
@@ -182,6 +173,12 @@ export function TimelineCanvas() {
     const mouseX = e.clientX - rect.left;
     const mouseY = e.clientY - rect.top;
     const { zoom, scrollX } = useTimelineStore.getState();
+
+    if (draggingPlayheadRef.current) {
+      const time = pixelToTime(mouseX, zoom, scrollX);
+      usePlaybackStore.getState().setCurrentTime(Math.max(0, time));
+      return;
+    }
 
     if (!dragRef.current) {
       if (mouseY <= RULER_HEIGHT) {
@@ -270,7 +267,7 @@ export function TimelineCanvas() {
         });
       }
     }
-  }, []);
+  }, [canvasRef]);
 
   const handleMouseUp = useCallback(() => {
     if (dragRef.current) {
@@ -325,6 +322,7 @@ export function TimelineCanvas() {
     }
 
     dragRef.current = null;
+    draggingPlayheadRef.current = false;
     snapLineRef.current = null;
   }, []);
 
