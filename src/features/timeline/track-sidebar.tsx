@@ -2,7 +2,7 @@ import { useProjectStore } from "@/core/stores/project-store";
 import { useTimelineStore } from "@/core/stores/timeline-store";
 import type { Track, TrackType } from "@/core/types/projects";
 import { nextTrackLabel } from "@/core/utils/track-naming";
-import { LANE_TOP, TRACK_TYPE_HEIGHT } from "./track-layout";
+import { LANE_TOP, getTrackLayout } from "./track-layout";
 import { useTimelineWheel } from "./use-timeline-wheel";
 import styles from "./styles/track-sidebar.module.css";
 import {
@@ -94,7 +94,7 @@ export function TrackSidebar({
         className={styles.trackList}
         style={{ transform: `translateY(${LANE_TOP - scrollY}px)` }}
       >
-        {tracks.map((track) => {
+        {getTrackLayout(tracks).map(({ track, height }) => {
           const isAudio = track.type === "audio";
           const hidden = !isAudio && !track.visible;
 
@@ -103,7 +103,7 @@ export function TrackSidebar({
               key={track.id}
               className={`${styles.track} ${hidden ? styles.trackOff : ""}`}
               data-track={track.id}
-              style={{ height: TRACK_TYPE_HEIGHT[track.type] }}
+              style={{ height }}
             >
               <span className={styles.trackIcon}>
                 {TRACK_ICONS[track.type]}
@@ -147,7 +147,8 @@ export function TrackSidebar({
               <button
                 className={styles.btn}
                 onClick={() => handleRemoveTrack(track.id)}
-                title={`Remove ${track.label}`}
+                title={track.deletable ? `Remove ${track.label}` : "Default track"}
+                disabled={!track.deletable}
               >
                 <Trash />
               </button>

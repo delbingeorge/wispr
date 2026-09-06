@@ -34,6 +34,7 @@ type Track = {
   muted: boolean;
   locked: boolean;
   visible: boolean;
+  deletable: boolean;
 };
 
 type Project = {
