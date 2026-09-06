@@ -1,5 +1,6 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import type { Track, TrackType } from "@/core/types/projects";
+import { nextTrackLabel } from "@/core/utils/track-naming";
 import styles from "./styles/track-sidebar.module.css";
 import {
   Eye,
@@ -28,8 +29,7 @@ export function TrackSidebar() {
   const updateTrack = useProjectStore((s) => s.updateTrack);
 
   const handleAddTrack = () => {
-    const videoCount = tracks.filter((t) => t.type === "video").length;
-    addTrack("video", `Video ${videoCount + 1}`);
+    addTrack("video", nextTrackLabel(tracks, "video"));
   };
 
   const handleToggleVisibility = (track: Track) => {

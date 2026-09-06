@@ -1,22 +1,133 @@
 .toolbar {
   display: flex;
   align-items: center;
-  gap: 16px;
-  height: 40px;
+  gap: 5px;
+  height: var(--chrome);
   padding: 0 12px;
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  background: #241f1f;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.025);
+  color: var(--ink);
+  position: relative;
 }
 
 .logo {
-  font-weight: 600;
-  font-size: 14px;
-  color: var(--color-text);
+  width: 24px;
+  height: 16px;
+  margin-right: 11px;
+  color: var(--ink);
+  flex: none;
 }
 
-.tools {
+.logo svg {
+  width: 24px;
+  height: 16px;
+}
+
+.menubar {
   display: flex;
-  gap: 4px;
+  align-items: center;
+  gap: 5px;
+}
+
+.mbT {
+  height: 25px;
+  padding: 0 11px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0.02px;
+}
+
+.mbT:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.mbTOn {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.mbTPlaceholder {
+  opacity: 0.34;
+  cursor: default;
+}
+
+.mbTPlaceholder:hover {
+  background: none;
+}
+
+.insertWrap {
+  position: relative;
+}
+
+.insertMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+  z-index: 20;
+  min-width: 206px;
+  padding: 12px 9px;
+  border-radius: 18px;
+  background: rgba(50, 41, 39, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+}
+
+.insertRow {
+  width: 100%;
+  height: 29px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  cursor: pointer;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 11.5px;
+  letter-spacing: 0.02px;
+}
+
+.insertRow:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.insertIcon {
+  width: 14px;
+  height: 14px;
+  flex: none;
+  display: grid;
+  place-items: center;
+}
+
+.insertIcon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.insertLabel {
+  flex: 1;
+  text-align: left;
+}
+
+.insertSep {
+  height: 1px;
+  margin: 5px 9px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 3px;
+  background: rgba(255, 255, 255, 0.06);
+  flex: none;
 }
 
 .btn {
@@ -65,6 +176,6 @@
 }
 
 .backBtn:hover {
-  background: var(--color-surface-alt);
-  color: var(--color-text);
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
 }
