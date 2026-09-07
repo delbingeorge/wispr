@@ -35,12 +35,6 @@
   outline-offset: 3px;
 }
 
-.cardDragging {
-  background: rgba(238, 255, 136, 0.12);
-  border-color: var(--accent);
-  transform: scale(1.02);
-}
-
 .cardDisabled {
   cursor: progress;
   opacity: 0.65;
@@ -71,32 +65,4 @@
   height: 1px;
   opacity: 0;
   pointer-events: none;
-}
-
-.dropOverlay {
-  position: absolute;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  background: rgba(16, 13, 13, 0.72);
-  pointer-events: none;
-}
-
-.dropOverlayCard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  padding: 34px 52px;
-  border-radius: 16px;
-  border: 1.5px dashed rgba(238, 255, 136, 0.85);
-  background: rgba(238, 255, 136, 0.1);
-  text-align: center;
-  color: var(--ink);
-}
-
-.dropOverlayCard .icon {
-  width: 22px;
-  height: 22px;
 }

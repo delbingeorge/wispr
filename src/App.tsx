@@ -7,6 +7,7 @@ import { TrackSidebar } from "./features/timeline/track-sidebar";
 import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 import { Toolbar } from "./features/toolbar/toolbar";
 import { AssetLibrary } from "./features/assets/asset-library";
+import { GlobalDropZone } from "./features/assets/global-drop-zone";
 import { useAssetLibraryStore } from "./core/stores/asset-library-store";
 import { useAutoSave } from "./core/hooks/use-auto-save";
 
@@ -98,6 +99,7 @@ function Editor({
         </div>
       </div>
       {isLibraryOpen && <AssetLibrary />}
+      <GlobalDropZone />
     </div>
   );
 }

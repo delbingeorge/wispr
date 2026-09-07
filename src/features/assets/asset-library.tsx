@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useProjectStore } from "@/core/stores/project-store";
 import {
   useAssetLibraryStore,
@@ -31,6 +31,14 @@ export function AssetLibrary() {
   const [selectionAnchorId, setSelectionAnchorId] = useState<string | null>(
     null,
   );
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [close]);
 
   const visibleAssets = useMemo(() => {
     const q = query.trim().toLowerCase();
