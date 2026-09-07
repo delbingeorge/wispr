@@ -276,6 +276,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
             muted: false,
             locked: false,
             visible: true,
+            deletable: false,
           },
           {
             id: generateId(),
@@ -285,6 +286,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
             muted: false,
             locked: false,
             visible: true,
+            deletable: false,
           },
           {
             id: generateId(),
@@ -294,6 +296,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
             muted: false,
             locked: false,
             visible: true,
+            deletable: false,
           },
         ],
         assets: [],

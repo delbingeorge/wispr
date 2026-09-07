@@ -68,7 +68,7 @@ export function useTimelineKeyboard() {
         const clipId = [...selectedClipIds][0];
         const clip = useProjectStore.getState().clips[clipId];
 
-        if (!clip) return;
+        if (!clip || clip.kind !== "media") return;
 
         const currentTime = usePlaybackStore.getState().currentTime;
         if (

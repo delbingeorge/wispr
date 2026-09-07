@@ -1,11 +1,16 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
+import {
+  clampOverlayPosition,
+  clampOverlaySize,
+} from "@/core/utils/overlay-bounds";
 import styles from "./styles/properties-panel.module.css";
 import { KeyframeSection } from "./keyframe-section";
 
 export function PropertiesPanel() {
   const selectedClipIds = useSelectionStore((s) => s.selectedClipIds);
   const clips = useProjectStore((s) => s.clips);
+  const project = useProjectStore((s) => s.project);
 
   if (selectedClipIds.size !== 1) {
     return (
@@ -44,14 +49,34 @@ export function PropertiesPanel() {
             className={styles.input}
             type="number"
             value={Math.round(p.x)}
-            onChange={(e) => updateProperty("x", Number(e.target.value))}
+            onChange={(e) => {
+              const { x } = clampOverlayPosition(
+                Number(e.target.value),
+                p.y,
+                p.width,
+                p.height,
+                project.resolution.width,
+                project.resolution.height,
+              );
+              updateProperty("x", x);
+            }}
           />
           <label className={styles.label}>Y</label>
           <input
             className={styles.input}
             type="number"
             value={Math.round(p.y)}
-            onChange={(e) => updateProperty("y", Number(e.target.value))}
+            onChange={(e) => {
+              const { y } = clampOverlayPosition(
+                p.x,
+                Number(e.target.value),
+                p.width,
+                p.height,
+                project.resolution.width,
+                project.resolution.height,
+              );
+              updateProperty("y", y);
+            }}
           />
         </div>
       </div>
@@ -64,14 +89,30 @@ export function PropertiesPanel() {
             className={styles.input}
             type="number"
             value={Math.round(p.width)}
-            onChange={(e) => updateProperty("width", Number(e.target.value))}
+            onChange={(e) => {
+              const { width } = clampOverlaySize(
+                Number(e.target.value),
+                p.height,
+                project.resolution.width,
+                project.resolution.height,
+              );
+              updateProperty("width", width);
+            }}
           />
           <label className={styles.label}>H</label>
           <input
             className={styles.input}
             type="number"
             value={Math.round(p.height)}
-            onChange={(e) => updateProperty("height", Number(e.target.value))}
+            onChange={(e) => {
+              const { height } = clampOverlaySize(
+                p.width,
+                Number(e.target.value),
+                project.resolution.width,
+                project.resolution.height,
+              );
+              updateProperty("height", height);
+            }}
           />
         </div>
       </div>
