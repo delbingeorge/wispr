@@ -16,13 +16,25 @@
   --color-accent: #e8e44f;
   --black: #000000;
   --white: #ffffff;
+
+  --ink: #ece5e4;
+  --ink-2: rgba(236, 229, 228, 0.74);
+  --ink-3: rgba(236, 229, 228, 0.46);
+  --line: rgba(255, 255, 255, 0.055);
+  --red: #fe5255;
+  --chrome: 38px;
+
+  --sans: "Figtree", "Neue Montreal", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 html,
 body,
 #root {
   height: 100%;
-  background: var(--color-bg);
-  color: var(--color-text);
-  font-family: "Inter", system-ui, sans-serif;
+  background: #241f1f;
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
 }

@@ -4,6 +4,10 @@ import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
 import { hitTestOverlays, type ResizeHandle } from "./overlay-hit-test";
 import { generateId } from "../../core/utils/id-generator";
+import {
+  clampOverlayPosition,
+  clampOverlaySize,
+} from "../../core/utils/overlay-bounds";
 import type { TextClip, ShapeClip, ShapeType } from "../../core/types/projects";
 
 type DragState = {
@@ -117,41 +121,73 @@ export function useOverlayInteraction(
       const dy = coords.y - drag.startMouseY;
 
       if (drag.type === "move") {
+        const { project } = useProjectStore.getState();
+        const { x, y } = clampOverlayPosition(
+          drag.originalX + dx,
+          drag.originalY + dy,
+          drag.originalWidth,
+          drag.originalHeight,
+          project.resolution.width,
+          project.resolution.height,
+        );
+
         useProjectStore.getState().updateClip(drag.clipId, {
           properties: {
             ...(
               useProjectStore.getState().clips[drag.clipId] as
                 TextClip | ShapeClip
             ).properties,
-            x: drag.originalX + dx,
-            y: drag.originalY + dy,
+            x,
+            y,
           },
         } as any);
       }
 
       if (drag.type === "resize" && drag.handle) {
-        let newX = drag.originalX;
-        let newY = drag.originalY;
-        let newW = drag.originalWidth;
-        let newH = drag.originalHeight;
+        const { project } = useProjectStore.getState();
+
+        let rawWidth = drag.originalWidth;
+        let rawHeight = drag.originalHeight;
 
         if (drag.handle === "se") {
-          newW = Math.max(20, drag.originalWidth + dx);
-          newH = Math.max(20, drag.originalHeight + dy);
+          rawWidth = drag.originalWidth + dx;
+          rawHeight = drag.originalHeight + dy;
         } else if (drag.handle === "sw") {
-          newX = drag.originalX + dx;
-          newW = Math.max(20, drag.originalWidth - dx);
-          newH = Math.max(20, drag.originalHeight + dy);
+          rawWidth = drag.originalWidth - dx;
+          rawHeight = drag.originalHeight + dy;
         } else if (drag.handle === "ne") {
-          newY = drag.originalY + dy;
-          newW = Math.max(20, drag.originalWidth + dx);
-          newH = Math.max(20, drag.originalHeight - dy);
+          rawWidth = drag.originalWidth + dx;
+          rawHeight = drag.originalHeight - dy;
         } else if (drag.handle === "nw") {
-          newX = drag.originalX + dx;
-          newY = drag.originalY + dy;
-          newW = Math.max(20, drag.originalWidth - dx);
-          newH = Math.max(20, drag.originalHeight - dy);
+          rawWidth = drag.originalWidth - dx;
+          rawHeight = drag.originalHeight - dy;
         }
+
+        const { width: newW, height: newH } = clampOverlaySize(
+          rawWidth,
+          rawHeight,
+          project.resolution.width,
+          project.resolution.height,
+        );
+
+        let newX = drag.originalX;
+        let newY = drag.originalY;
+
+        if (drag.handle === "sw" || drag.handle === "nw") {
+          newX = drag.originalX + drag.originalWidth - newW;
+        }
+        if (drag.handle === "ne" || drag.handle === "nw") {
+          newY = drag.originalY + drag.originalHeight - newH;
+        }
+
+        const { x, y } = clampOverlayPosition(
+          newX,
+          newY,
+          newW,
+          newH,
+          project.resolution.width,
+          project.resolution.height,
+        );
 
         useProjectStore.getState().updateClip(drag.clipId, {
           properties: {
@@ -159,8 +195,8 @@ export function useOverlayInteraction(
               useProjectStore.getState().clips[drag.clipId] as
                 TextClip | ShapeClip
             ).properties,
-            x: newX,
-            y: newY,
+            x,
+            y,
             width: newW,
             height: newH,
           },
@@ -204,6 +240,14 @@ export function useOverlayInteraction(
     const clipId = generateId();
 
     if (activeTool === "text") {
+      const { x, y } = clampOverlayPosition(
+        projectX - 100,
+        projectY - 20,
+        200,
+        40,
+        project.resolution.width,
+        project.resolution.height,
+      );
       const clip: TextClip = {
         id: clipId,
         trackId: overlayTrack.id,
@@ -212,8 +256,8 @@ export function useOverlayInteraction(
         duration: 5,
         text: "Text",
         properties: {
-          x: projectX - 100,
-          y: projectY - 20,
+          x,
+          y,
           width: 200,
           height: 40,
           rotation: 0,
@@ -228,6 +272,14 @@ export function useOverlayInteraction(
       };
       useProjectStore.getState().addClip(clip);
     } else {
+      const { x, y } = clampOverlayPosition(
+        projectX - 75,
+        projectY - 75,
+        150,
+        150,
+        project.resolution.width,
+        project.resolution.height,
+      );
       const clip: ShapeClip = {
         id: clipId,
         trackId: overlayTrack.id,
@@ -236,8 +288,8 @@ export function useOverlayInteraction(
         startTime: currentTime,
         duration: 5,
         properties: {
-          x: projectX - 75,
-          y: projectY - 75,
+          x,
+          y,
           width: 150,
           height: 150,
           rotation: 0,

@@ -1,0 +1,42 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  background: rgba(16, 13, 13, 0.72);
+  backdrop-filter: blur(3px);
+  pointer-events: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+  padding: 34px 52px;
+  border-radius: 16px;
+  border: 1.5px dashed rgba(238, 255, 136, 0.85);
+  background: rgba(238, 255, 136, 0.1);
+  text-align: center;
+  color: var(--ink);
+}
+
+.icon {
+  width: 22px;
+  height: 22px;
+  color: var(--color-accent);
+  display: grid;
+  place-items: center;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.sub {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.45);
+}

@@ -3,6 +3,7 @@ import { useSelectionStore } from "@/core/stores/selection-store";
 import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useProjectStore } from "@/core/stores/project-store";
 import { useHistoryStore } from "@/core/stores/history-store";
+import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
 import {
   createSplitCommand,
   createDeleteCommand,
@@ -27,6 +28,12 @@ export function useTimelineKeyboard() {
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && e.shiftKey) {
         e.preventDefault();
         redo();
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "l") {
+        e.preventDefault();
+        useAssetLibraryStore.getState().open();
         return;
       }
 
@@ -61,7 +68,7 @@ export function useTimelineKeyboard() {
         const clipId = [...selectedClipIds][0];
         const clip = useProjectStore.getState().clips[clipId];
 
-        if (!clip) return;
+        if (!clip || clip.kind !== "media") return;
 
         const currentTime = usePlaybackStore.getState().currentTime;
         if (

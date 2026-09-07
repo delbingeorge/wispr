@@ -1,8 +1,15 @@
 import type { Clip, Track } from "@/core/types/projects";
-import { pixelToTime } from "@/core/utils/time-coordinate";
-import { RULER_HEIGHT, TRACK_HEIGHT } from "./timeline-renderer";
+import { pixelToTime, timeToPixel } from "@/core/utils/time-coordinate";
+import {
+  RULER_HEIGHT,
+  getTrackLayout,
+  PLAYHEAD_GRIP_TOP,
+  PLAYHEAD_GRIP_HEIGHT,
+} from "./track-layout";
 
 const TRIM_HANDLE_WIDTH = 8;
+const GRIP_HIT_HALF_WIDTH = 9;
+const GRIP_HIT_PADDING = 4;
 
 type HitEmpty = { type: "empty"; trackIndex: number; time: number };
 type HitClip = {
@@ -11,17 +18,29 @@ type HitClip = {
   region: "body" | "trimStart" | "trimEnd";
 };
 type HitRuler = { type: "ruler"; time: number };
+type HitPlayheadGrip = { type: "playheadGrip" };
 
-type HitTestResult = HitEmpty | HitClip | HitRuler;
+type HitTestResult = HitEmpty | HitClip | HitRuler | HitPlayheadGrip;
 
 export function hitTest(
   mouseX: number,
   mouseY: number,
   zoom: number,
   scrollX: number,
+  scrollY: number,
+  currentTime: number,
   tracks: Track[],
   clips: Record<string, Clip>,
 ): HitTestResult {
+  const gripX = timeToPixel(currentTime, zoom, scrollX);
+  if (
+    Math.abs(mouseX - gripX) <= GRIP_HIT_HALF_WIDTH &&
+    mouseY >= PLAYHEAD_GRIP_TOP - GRIP_HIT_PADDING &&
+    mouseY <= PLAYHEAD_GRIP_TOP + PLAYHEAD_GRIP_HEIGHT + GRIP_HIT_PADDING
+  ) {
+    return { type: "playheadGrip" };
+  }
+
   if (mouseY <= RULER_HEIGHT) {
     return {
       type: "ruler",
@@ -29,15 +48,23 @@ export function hitTest(
     };
   }
 
-  const trackIndex = Math.floor((mouseY - RULER_HEIGHT) / TRACK_HEIGHT);
+  const laneY = mouseY - RULER_HEIGHT + scrollY;
+  const layout = getTrackLayout(tracks);
+  const entry = layout.find((e) => laneY >= e.top && laneY < e.top + e.height);
 
-  if (trackIndex < 0 || trackIndex >= tracks.length) {
+  if (!entry) {
     const time = pixelToTime(mouseX, zoom, scrollX);
-
-    return { type: "empty", trackIndex: Math.max(0, trackIndex), time };
+    const belowAllLanes =
+      layout.length > 0 &&
+      laneY >= layout[layout.length - 1].top + layout[layout.length - 1].height;
+    return {
+      type: "empty",
+      trackIndex: belowAllLanes ? tracks.length : -1,
+      time,
+    };
   }
 
-  const track = tracks[trackIndex];
+  const track = entry.track;
   const time = pixelToTime(mouseX, zoom, scrollX);
 
   for (const clipId of track.clips) {
@@ -60,7 +87,7 @@ export function hitTest(
     return { type: "clip", clipId, region: "body" };
   }
 
-  return { type: "empty", trackIndex, time };
+  return { type: "empty", trackIndex: entry.index, time };
 }
 
 export type { HitTestResult };

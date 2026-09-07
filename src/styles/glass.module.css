@@ -1,0 +1,11 @@
+.panel {
+  background: rgba(28, 24, 24, 0.82);
+}
+
+.chip {
+  background: rgba(46, 40, 40, 0.55);
+}
+
+.heavy {
+  background: rgba(50, 41, 39, 0.78);
+}

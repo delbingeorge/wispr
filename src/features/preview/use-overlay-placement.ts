@@ -3,7 +3,8 @@ import { useProjectStore } from "@/core/stores/project-store";
 import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
 import { generateId } from "@/core/utils/id-generator";
-import type { TextClip, ShapeClip, Tool } from "../../core/types/projects";
+import { clampOverlayPosition } from "@/core/utils/overlay-bounds";
+import type { TextClip, ShapeClip } from "../../core/types/projects";
 
 export function useOverlayPlacement(
   canvasRef: React.RefObject<HTMLCanvasElement | null>,
@@ -37,6 +38,14 @@ export function useOverlayPlacement(
       const clipId = generateId();
 
       if (activeTool === "text") {
+        const { x, y } = clampOverlayPosition(
+          projectX - 100,
+          projectY - 20,
+          200,
+          40,
+          project.resolution.width,
+          project.resolution.height,
+        );
         const clip: TextClip = {
           id: clipId,
           trackId: overlayTrack.id,
@@ -45,8 +54,8 @@ export function useOverlayPlacement(
           duration: 5,
           text: "Text",
           properties: {
-            x: projectX - 100,
-            y: projectY - 20,
+            x,
+            y,
             width: 200,
             height: 40,
             rotation: 0,
@@ -61,6 +70,14 @@ export function useOverlayPlacement(
         };
         useProjectStore.getState().addClip(clip);
       } else {
+        const { x, y } = clampOverlayPosition(
+          projectX - 75,
+          projectY - 75,
+          150,
+          150,
+          project.resolution.width,
+          project.resolution.height,
+        );
         const clip: ShapeClip = {
           id: clipId,
           trackId: overlayTrack.id,
@@ -69,8 +86,8 @@ export function useOverlayPlacement(
           startTime: currentTime,
           duration: 5,
           properties: {
-            x: projectX - 75,
-            y: projectY - 75,
+            x,
+            y,
             width: 150,
             height: 150,
             rotation: 0,

@@ -40,6 +40,27 @@ export const useProjectStore = create<ProjectState>((set) => ({
         muted: false,
         locked: false,
         visible: true,
+        deletable: false,
+      },
+      {
+        id: generateId(),
+        type: "audio",
+        label: "Audio 1",
+        clips: [],
+        muted: false,
+        locked: false,
+        visible: true,
+        deletable: false,
+      },
+      {
+        id: generateId(),
+        type: "overlay",
+        label: "Effects",
+        clips: [],
+        muted: false,
+        locked: false,
+        visible: true,
+        deletable: false,
       },
     ],
     assets: [],
@@ -165,6 +186,7 @@ export const useProjectStore = create<ProjectState>((set) => ({
             muted: false,
             locked: false,
             visible: true,
+            deletable: true,
           },
         ],
         updatedAt: Date.now(),
@@ -173,10 +195,11 @@ export const useProjectStore = create<ProjectState>((set) => ({
 
   removeTrack: (trackId) =>
     set((state) => {
-      const trackClipIds =
-        state.project.tracks.find((t) => t.id === trackId)?.clips ?? [];
+      const track = state.project.tracks.find((t) => t.id === trackId);
+      if (!track || !track.deletable) return state;
+
       const remainingClips = { ...state.clips };
-      for (const clipId of trackClipIds) {
+      for (const clipId of track.clips) {
         delete remainingClips[clipId];
       }
 
@@ -248,11 +271,32 @@ export const useProjectStore = create<ProjectState>((set) => ({
           {
             id: generateId(),
             type: "video",
-            label: "Video",
+            label: "Video 1",
             clips: [],
             muted: false,
             locked: false,
             visible: true,
+            deletable: false,
+          },
+          {
+            id: generateId(),
+            type: "audio",
+            label: "Audio 1",
+            clips: [],
+            muted: false,
+            locked: false,
+            visible: true,
+            deletable: false,
+          },
+          {
+            id: generateId(),
+            type: "overlay",
+            label: "Effects",
+            clips: [],
+            muted: false,
+            locked: false,
+            visible: true,
+            deletable: false,
           },
         ],
         assets: [],

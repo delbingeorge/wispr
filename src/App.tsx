@@ -6,17 +6,22 @@ import { TimelineCanvas } from "./features/timeline/timeline-canvas";
 import { TrackSidebar } from "./features/timeline/track-sidebar";
 import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 import { Toolbar } from "./features/toolbar/toolbar";
+import { AssetLibrary } from "./features/assets/asset-library";
+import { GlobalDropZone } from "./features/assets/global-drop-zone";
+import { useAssetLibraryStore } from "./core/stores/asset-library-store";
 import { useAutoSave } from "./core/hooks/use-auto-save";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { HomeScreen } from "./features/home/home-screen";
 import { useProjectLoader } from "./core/hooks/use-project-loader";
 import { useProjectStore } from "./core/stores/project-store";
 import { generateId } from "./core/utils/id-generator";
 
+import { ToastContainer } from "./features/ui/toast";
+
 export default function App() {
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const { loading, found, missingAssets } = useProjectLoader(activeProjectId);
+  const { loading, missingAssets } = useProjectLoader(activeProjectId);
 
   const handleNewProject = useCallback(() => {
     const id = generateId();
@@ -34,18 +39,31 @@ export default function App() {
 
   if (!activeProjectId) {
     return (
-      <HomeScreen
-        onOpenProject={handleOpenProject}
-        onNewProject={handleNewProject}
-      />
+      <>
+        <HomeScreen
+          onOpenProject={handleOpenProject}
+          onNewProject={handleNewProject}
+        />
+        <ToastContainer />
+      </>
     );
   }
 
   if (loading) {
-    return <div className={styles.loading}>Loading project...</div>;
+    return (
+      <>
+        <div className={styles.loading}>Loading project...</div>
+        <ToastContainer />
+      </>
+    );
   }
 
-  return <Editor missingAssets={missingAssets} onBack={handleBackToHome} />;
+  return (
+    <>
+      <Editor missingAssets={missingAssets} onBack={handleBackToHome} />
+      <ToastContainer />
+    </>
+  );
 }
 
 function Editor({
@@ -57,6 +75,8 @@ function Editor({
 }) {
   useTimelineKeyboard();
   useAutoSave();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isLibraryOpen = useAssetLibraryStore((s) => s.isOpen);
 
   return (
     <div className={styles.layout}>
@@ -73,11 +93,13 @@ function Editor({
       <PropertiesPanel />
       <PlaybackControls />
       <div className={styles.timelineArea}>
-        <TrackSidebar />
+        <TrackSidebar canvasRef={canvasRef} />
         <div className={styles.timeline}>
-          <TimelineCanvas />
+          <TimelineCanvas canvasRef={canvasRef} />
         </div>
       </div>
+      {isLibraryOpen && <AssetLibrary />}
+      <GlobalDropZone />
     </div>
   );
 }

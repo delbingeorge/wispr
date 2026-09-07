@@ -8,6 +8,7 @@ import { renderOverlays } from "./overlay-renderer";
 import styles from "./styles/preview-canvas.module.css";
 import { useOverlayInteraction } from "./use-overlay-interaction";
 import { useSelectionStore } from "@/core/stores/selection-store";
+import { getVideoDisplayRect } from "@/core/utils/video-frame";
 
 export function PreviewCanvas() {
   const assets = useProjectStore((s) => s.project.assets);
@@ -61,15 +62,24 @@ export function PreviewCanvas() {
       rafRef.current = requestAnimationFrame(loop);
       if (!canvas.parentElement) return;
 
-      const rect = canvas.parentElement.getBoundingClientRect();
+      const containerRect = canvas.parentElement.getBoundingClientRect();
       const { project, clips } = useProjectStore.getState();
       const { currentTime } = usePlaybackStore.getState();
 
+      const videoRect = getVideoDisplayRect(
+        containerRect.width,
+        containerRect.height,
+        project.resolution.width,
+        project.resolution.height,
+      );
+
       const dpr = devicePixelRatio;
-      canvas.width = rect.width * dpr;
-      canvas.height = rect.height * dpr;
-      canvas.style.width = `${rect.width}px`;
-      canvas.style.height = `${rect.height}px`;
+      canvas.width = videoRect.width * dpr;
+      canvas.height = videoRect.height * dpr;
+      canvas.style.width = `${videoRect.width}px`;
+      canvas.style.height = `${videoRect.height}px`;
+      canvas.style.left = `${videoRect.x}px`;
+      canvas.style.top = `${videoRect.y}px`;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
@@ -86,18 +96,11 @@ export function PreviewCanvas() {
         clips,
         overlayTrackClipIds,
         currentTime,
-        rect.width,
-        rect.height,
+        videoRect.width,
+        videoRect.height,
         project.resolution.width,
         project.resolution.height,
         selectedClipId,
-      );
-
-      console.log(
-        "overlay clips:",
-        overlayTrackClipIds.length,
-        "time:",
-        currentTime,
       );
     };
 
