@@ -6,6 +6,8 @@ import { TimelineCanvas } from "./features/timeline/timeline-canvas";
 import { TrackSidebar } from "./features/timeline/track-sidebar";
 import { useTimelineKeyboard } from "./features/timeline/use-timeline-keyboard";
 import { Toolbar } from "./features/toolbar/toolbar";
+import { AssetLibrary } from "./features/assets/asset-library";
+import { useAssetLibraryStore } from "./core/stores/asset-library-store";
 import { useAutoSave } from "./core/hooks/use-auto-save";
 
 import { useState, useCallback, useRef } from "react";
@@ -73,6 +75,7 @@ function Editor({
   useTimelineKeyboard();
   useAutoSave();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isLibraryOpen = useAssetLibraryStore((s) => s.isOpen);
 
   return (
     <div className={styles.layout}>
@@ -94,6 +97,7 @@ function Editor({
           <TimelineCanvas canvasRef={canvasRef} />
         </div>
       </div>
+      {isLibraryOpen && <AssetLibrary />}
     </div>
   );
 }

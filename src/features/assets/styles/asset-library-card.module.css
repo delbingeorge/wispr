@@ -1,0 +1,113 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  text-align: left;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 7px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.thumb img,
+.thumb canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card:hover .thumb {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22) inset;
+}
+
+.card.selected .thumb {
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.duration {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  padding: 0 5px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 5px;
+  background: rgba(18, 16, 16, 0.72);
+  backdrop-filter: blur(4px);
+  font-family: var(--mono);
+  font-size: 9px;
+  color: #fff;
+  letter-spacing: -0.2px;
+}
+
+.name {
+  font-size: 10.5px;
+  line-height: 1.25;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.check {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  color: #2c2d19;
+  display: none;
+  place-items: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+.check svg {
+  width: 10px;
+  height: 10px;
+}
+
+.card.selected .check {
+  display: grid;
+}
+
+.meta {
+  font-size: 9.5px;
+  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.02px;
+}
+
+.thumbAudio {
+  display: grid;
+  place-items: center;
+  background: rgba(238, 255, 136, 0.07);
+}
+
+.bars {
+  display: flex;
+  align-items: center;
+  gap: 2.5px;
+  height: 56%;
+}
+
+.bars i {
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-accent);
+  opacity: 0.8;
+}

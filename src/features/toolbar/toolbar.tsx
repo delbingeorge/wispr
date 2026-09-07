@@ -1,6 +1,7 @@
 import { useSelectionStore } from "@/core/stores/selection-store";
 import type { Tool } from "@/core/stores/selection-store";
 import { useProjectStore } from "@/core/stores/project-store";
+import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
 import type { TrackType } from "@/core/types/projects";
 import { nextTrackLabel } from "@/core/utils/track-naming";
 import styles from "./styles/toolbar.module.css";
@@ -27,11 +28,19 @@ function insertTrack(type: TrackType) {
   addTrack(type, nextTrackLabel(project.tracks, type));
 }
 
-type InsertRow =
+type MenuRow =
   | { kind: "sep" }
-  | { kind: "action"; label: string; icon: ReactNode; onSelect: () => void };
+  | { kind: "action"; label: string; icon?: ReactNode; onSelect: () => void };
 
-const INSERT_ROWS: InsertRow[] = [
+const FILE_ROWS: MenuRow[] = [
+  {
+    kind: "action",
+    label: "Asset Library",
+    onSelect: () => useAssetLibraryStore.getState().open(),
+  },
+];
+
+const INSERT_ROWS: MenuRow[] = [
   {
     kind: "action",
     label: "Text",
@@ -84,17 +93,68 @@ const INSERT_ROWS: InsertRow[] = [
   },
 ];
 
+function MenuBarDropdown({
+  label,
+  rows,
+  open,
+  onToggle,
+  onSelectRow,
+}: {
+  label: string;
+  rows: MenuRow[];
+  open: boolean;
+  onToggle: () => void;
+  onSelectRow: () => void;
+}) {
+  return (
+    <div
+      className={styles.insertWrap}
+      onPointerDown={(e) => e.stopPropagation()}
+    >
+      <button
+        className={`${styles.mbT} ${open ? styles.mbTOn : ""}`}
+        onClick={onToggle}
+      >
+        {label}
+      </button>
+      {open && (
+        <div className={styles.insertMenu}>
+          {rows.map((row, i) =>
+            row.kind === "sep" ? (
+              <div key={i} className={styles.insertSep} />
+            ) : (
+              <button
+                key={row.label}
+                className={styles.insertRow}
+                onClick={() => {
+                  row.onSelect();
+                  onSelectRow();
+                }}
+              >
+                {row.icon && (
+                  <span className={styles.insertIcon}>{row.icon}</span>
+                )}
+                <span className={styles.insertLabel}>{row.label}</span>
+              </button>
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function Toolbar({ onBack }: { onBack: () => void }) {
   const activeTool = useSelectionStore((s) => s.activeTool);
   const [showExport, setShowExport] = useState(false);
-  const [insertOpen, setInsertOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<"file" | "insert" | null>(null);
 
   useEffect(() => {
-    if (!insertOpen) return;
-    const onDown = () => setInsertOpen(false);
+    if (!openMenu) return;
+    const onDown = () => setOpenMenu(null);
     document.addEventListener("pointerdown", onDown);
     return () => document.removeEventListener("pointerdown", onDown);
-  }, [insertOpen]);
+  }, [openMenu]);
 
   return (
     <>
@@ -104,9 +164,16 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
         </span>
 
         <nav className={styles.menubar} aria-label="Main menu">
-          <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
-            File
-          </button>
+          <MenuBarDropdown
+            label="File"
+            rows={FILE_ROWS}
+            open={openMenu === "file"}
+            onToggle={() =>
+              setOpenMenu((current) => (current === "file" ? null : "file"))
+            }
+            onSelectRow={() => setOpenMenu(null)}
+          />
+
           <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
             Edit
           </button>
@@ -114,38 +181,17 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
             View
           </button>
 
-          <div
-            className={styles.insertWrap}
-            onPointerDown={(e) => e.stopPropagation()}
-          >
-            <button
-              className={`${styles.mbT} ${insertOpen ? styles.mbTOn : ""}`}
-              onClick={() => setInsertOpen((open) => !open)}
-            >
-              Insert
-            </button>
-            {insertOpen && (
-              <div className={styles.insertMenu}>
-                {INSERT_ROWS.map((row, i) =>
-                  row.kind === "sep" ? (
-                    <div key={i} className={styles.insertSep} />
-                  ) : (
-                    <button
-                      key={row.label}
-                      className={styles.insertRow}
-                      onClick={() => {
-                        row.onSelect();
-                        setInsertOpen(false);
-                      }}
-                    >
-                      <span className={styles.insertIcon}>{row.icon}</span>
-                      <span className={styles.insertLabel}>{row.label}</span>
-                    </button>
-                  ),
-                )}
-              </div>
-            )}
-          </div>
+          <MenuBarDropdown
+            label="Insert"
+            rows={INSERT_ROWS}
+            open={openMenu === "insert"}
+            onToggle={() =>
+              setOpenMenu((current) =>
+                current === "insert" ? null : "insert",
+              )
+            }
+            onSelectRow={() => setOpenMenu(null)}
+          />
 
           <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
             Help

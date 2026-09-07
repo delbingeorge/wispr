@@ -1,7 +1,10 @@
 import { useProjectStore } from "@/core/stores/project-store";
 import { useTimelineStore } from "@/core/stores/timeline-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
+import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
 import type { Track, TrackType } from "@/core/types/projects";
 import { nextTrackLabel } from "@/core/utils/track-naming";
+import { toast } from "@/features/ui/toast-store";
 import { LANE_TOP, getTrackLayout } from "./track-layout";
 import { useTimelineWheel } from "./use-timeline-wheel";
 import styles from "./styles/track-sidebar.module.css";
@@ -88,6 +91,19 @@ export function TrackSidebar({
     removeTrack(trackId);
   };
 
+  const handleAddToTrack = (track: Track) => {
+    if (track.type === "overlay") {
+      useSelectionStore.getState().setActiveTool("text");
+      toast.ok("Text tool armed", "Click the preview to place it.");
+      return;
+    }
+
+    useAssetLibraryStore.getState().open({
+      targetTrackId: track.id,
+      filter: track.type === "audio" ? "audio" : "video",
+    });
+  };
+
   return (
     <div className={styles.sidebar} ref={sidebarRef}>
       <div
@@ -112,6 +128,7 @@ export function TrackSidebar({
 
               <button
                 className={`${styles.btn} ${styles.btnAdd}`}
+                onClick={() => handleAddToTrack(track)}
                 title={`Add to ${track.label}`}
                 disabled={track.locked}
               >
