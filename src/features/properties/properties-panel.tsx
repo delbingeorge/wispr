@@ -12,24 +12,12 @@ export function PropertiesPanel() {
   const clips = useProjectStore((s) => s.clips);
   const project = useProjectStore((s) => s.project);
 
-  if (selectedClipIds.size !== 1) {
-    return (
-      <div className={styles.panel}>
-        <span className={styles.empty}>Select an overlay to edit</span>
-      </div>
-    );
-  }
+  if (selectedClipIds.size !== 1) return null;
 
   const clipId = [...selectedClipIds][0];
   const clip = clips[clipId];
 
-  if (!clip || clip.kind === "media") {
-    return (
-      <div className={styles.panel}>
-        <span className={styles.empty}>Select an overlay to edit</span>
-      </div>
-    );
-  }
+  if (!clip || clip.kind === "media") return null;
 
   const updateProperty = (key: string, value: number | string) => {
     useProjectStore.getState().updateClip(clipId, {

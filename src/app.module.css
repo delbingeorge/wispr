@@ -1,6 +1,6 @@
 .layout {
   display: grid;
-  grid-template-columns: 1fr 240px;
+  grid-template-columns: 1fr auto;
   grid-template-rows: auto 1fr auto auto;
   grid-template-areas:
     "toolbar toolbar"
@@ -8,22 +8,6 @@
     "playback playback"
     "timeline timeline";
   height: 100%;
-}
-
-.layout > :nth-child(1) {
-  grid-area: toolbar;
-}
-.layout > :nth-child(2) {
-  grid-area: preview;
-}
-.layout > :nth-child(3) {
-  grid-area: properties;
-}
-.layout > :nth-child(4) {
-  grid-area: playback;
-}
-.layout > :nth-child(5) {
-  grid-area: timeline;
 }
 
 .topbar {
@@ -35,6 +19,7 @@
 }
 
 .preview {
+  grid-area: preview;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -48,7 +33,7 @@
 }
 
 .timelineArea {
-  grid-column: 1 / -1;
+  grid-area: timeline;
   display: flex;
   height: 280px;
   border-top: 1px solid var(--color-border);
