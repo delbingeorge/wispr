@@ -1,12 +1,13 @@
 .layout {
+  position: relative;
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr;
   grid-template-rows: auto 1fr auto auto;
   grid-template-areas:
-    "toolbar toolbar"
-    "preview properties"
-    "playback playback"
-    "timeline timeline";
+    "toolbar"
+    "preview"
+    "playback"
+    "timeline";
   height: 100%;
 }
 
