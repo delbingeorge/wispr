@@ -1,4 +1,5 @@
 .controls {
+  grid-area: playback;
   display: flex;
   align-items: center;
   justify-content: space-between;

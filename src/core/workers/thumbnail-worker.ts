@@ -8,6 +8,7 @@ import {
 
 type GenerateMessage = {
   type: "generate";
+  requestId: number;
   opfsPath: string;
   timestamps: number[];
   width: number;
@@ -127,13 +128,18 @@ async function generateThumbnails(data: GenerateMessage) {
 
       const bitmap = await createImageBitmap(canvas);
       self.postMessage(
-        { type: "thumbnail", timestamp: targetTime, bitmap },
+        {
+          type: "thumbnail",
+          requestId: data.requestId,
+          timestamp: targetTime,
+          bitmap,
+        },
         { transfer: [bitmap] },
       );
     }
   }
 
-  self.postMessage({ type: "complete" });
+  self.postMessage({ type: "complete", requestId: data.requestId });
 }
 
 function decodeSingleFrame(
@@ -191,10 +197,18 @@ function decodeSingleFrame(
   });
 }
 
+let queue: Promise<void> = Promise.resolve();
+
 self.onmessage = (e: MessageEvent<GenerateMessage>) => {
-  if (e.data.type === "generate") {
+  if (e.data.type !== "generate") return;
+
+  queue = queue.then(() =>
     generateThumbnails(e.data).catch((err) => {
-      self.postMessage({ type: "error", message: String(err) });
-    });
-  }
+      self.postMessage({
+        type: "error",
+        requestId: e.data.requestId,
+        message: String(err),
+      });
+    }),
+  );
 };

@@ -6,7 +6,10 @@ import { useTimelineStore } from "@/core/stores/timeline-store";
 import { useSelectionStore } from "@/core/stores/selection-store";
 import { pixelToTime } from "@/core/utils/time-coordinate";
 import { hitTest } from "./hit-test";
-import { getThumbnail } from "@/core/webcodecs/thumbnail-generator";
+import {
+  getThumbnail,
+  subscribeToThumbnails,
+} from "@/core/webcodecs/thumbnail-generator";
 import { TimelineRenderer } from "./timeline-renderer";
 import { RULER_HEIGHT } from "./track-layout";
 import { setOnIconReady } from "./canvas-icon-cache";
@@ -57,6 +60,8 @@ export function TimelineCanvas({
   useEffect(() => {
     setOnIconReady(markDirty);
   }, [markDirty]);
+
+  useEffect(() => subscribeToThumbnails(markDirty), [markDirty]);
 
   useEffect(() => {
     const canvas = canvasRef.current;

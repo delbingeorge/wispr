@@ -4,7 +4,6 @@ import { formatTime } from "@/core/utils/time-format";
 import {
   RULER_HEIGHT,
   getTrackLayout,
-  getLanesHeight,
   PLAYHEAD_GRIP_TOP,
   PLAYHEAD_GRIP_WIDTH,
   PLAYHEAD_GRIP_HEIGHT,
@@ -68,7 +67,6 @@ export class TimelineRenderer {
     layout: TrackLayoutEntry[],
   ) {
     const lanesTop = RULER_HEIGHT - data.scrollY;
-    const lanesHeight = getLanesHeight(data.tracks);
 
     const grad = ctx.createLinearGradient(0, 0, data.width, 0);
     grad.addColorStop(0.012, "#302a2b");
@@ -80,7 +78,12 @@ export class TimelineRenderer {
     grad.addColorStop(0.867, "#2d2b2c");
     grad.addColorStop(0.988, "#2b292c");
     ctx.fillStyle = grad;
-    ctx.fillRect(0, lanesTop, data.width, lanesHeight);
+    ctx.fillRect(
+      0,
+      RULER_HEIGHT,
+      data.width,
+      Math.max(0, data.height - RULER_HEIGHT),
+    );
 
     for (const entry of layout) {
       const y = lanesTop + entry.top;

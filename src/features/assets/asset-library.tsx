@@ -1,5 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useProjectStore } from "@/core/stores/project-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
+import { removeFileFromOpfs } from "@/core/storage/opfs-storage";
+import { releaseAssetThumbnails } from "@/core/webcodecs/thumbnail-generator";
+import { releaseAssetBlobUrl } from "@/features/preview/asset-blob-cache";
+import { toast } from "@/features/ui/toast-store";
 import {
   useAssetLibraryStore,
   type AssetLibraryFilter,
@@ -22,7 +27,7 @@ export function AssetLibrary() {
   const initialFilter = useAssetLibraryStore((s) => s.initialFilter);
   const close = useAssetLibraryStore((s) => s.close);
   const assets = useProjectStore((s) => s.project.assets);
-  const { importFiles } = useMediaImport();
+  const { importFiles, busy } = useMediaImport();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [filter, setFilter] = useState<AssetLibraryFilter>(initialFilter);
@@ -79,8 +84,37 @@ export function AssetLibrary() {
     close();
   };
 
+  const handleRemoveSelected = async () => {
+    const removedAssets = assets.filter((a) => selectedIds.has(a.id));
+    if (removedAssets.length === 0) return;
+
+    const { clips, removeAsset } = useProjectStore.getState();
+    const removedClipCount = Object.values(clips).filter(
+      (clip) => clip.kind === "media" && selectedIds.has(clip.assetId),
+    ).length;
+
+    for (const asset of removedAssets) {
+      removeAsset(asset.id);
+      releaseAssetThumbnails(asset.id);
+      releaseAssetBlobUrl(asset.id);
+    }
+
+    setSelectedIds(new Set());
+    if (removedClipCount > 0) useSelectionStore.getState().deselectAll();
+
+    await Promise.all(
+      removedAssets.map((asset) => removeFileFromOpfs(asset.opfsPath)),
+    );
+
+    toast.ok(
+      `Removed ${removedAssets.length} asset${removedAssets.length > 1 ? "s" : ""}`,
+      removedClipCount > 0
+        ? `${removedClipCount} clip${removedClipCount > 1 ? "s" : ""} deleted from the timeline`
+        : "No timeline clips were using them",
+    );
+  };
+
   const handleImportClick = () => {
-    close();
     fileInputRef.current?.click();
   };
 
@@ -151,8 +185,21 @@ export function AssetLibrary() {
         )}
 
         <div className={styles.foot}>
-          <button className={styles.importBtn} onClick={handleImportClick}>
-            Import media
+          {selectedIds.size > 0 && (
+            <button
+              className={styles.removeBtn}
+              onClick={handleRemoveSelected}
+              title="Delete from the project and this device"
+            >
+              Remove
+            </button>
+          )}
+          <button
+            className={styles.importBtn}
+            onClick={handleImportClick}
+            disabled={busy}
+          >
+            {busy ? "Importing…" : "Import media"}
           </button>
           <button
             className={styles.addBtn}

@@ -8,6 +8,7 @@ import {
 } from "mp4box";
 import type { Clip, Track, Keyframe } from "../types/projects";
 import { resolveProperty } from "../utils/keyframe-interpolation";
+import { findActiveVideoClip } from "../utils/clip-lookup";
 
 type ExportMessage = {
   type: "export";
@@ -325,24 +326,6 @@ function drawOverlays(
   }
 }
 
-function findActiveMediaClip(
-  clips: Record<string, Clip>,
-  tracks: Track[],
-  time: number,
-): Clip | null {
-  for (const track of tracks) {
-    if (track.type !== "video" || !track.visible) continue;
-    for (const clipId of track.clips) {
-      const clip = clips[clipId];
-      if (!clip || clip.kind !== "media") continue;
-      if (time >= clip.startTime && time < clip.startTime + clip.duration) {
-        return clip;
-      }
-    }
-  }
-  return null;
-}
-
 async function runExport(data: ExportMessage) {
   console.log("cursor reached inside run export");
   const { clips, tracks, assets, resolution, fps, bitrate, duration } = data;
@@ -407,13 +390,13 @@ async function runExport(data: ExportMessage) {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, resolution.width, resolution.height);
 
-    const activeClip = findActiveMediaClip(clips, tracks, currentTime);
+    const active = findActiveVideoClip(clips, tracks, currentTime);
 
-    if (activeClip && activeClip.kind === "media") {
-      const assetData = assetDataMap.get(activeClip.assetId);
+    if (active) {
+      const assetData = assetDataMap.get(active.clip.assetId);
       if (assetData) {
         const sourceTime =
-          activeClip.inPoint + (currentTime - activeClip.startTime);
+          active.clip.inPoint + (currentTime - active.clip.startTime);
         const sourceTimeMicro = sourceTime * 1_000_000;
 
         const decoded = await decodeFrameAtTime(
