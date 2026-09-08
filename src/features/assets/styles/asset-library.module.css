@@ -186,9 +186,14 @@
   letter-spacing: 0.02px;
 }
 
-.importBtn:hover {
+.importBtn:hover:not(:disabled) {
   border-color: rgba(238, 255, 136, 0.5);
   color: var(--color-accent);
+}
+
+.importBtn:disabled {
+  color: rgba(255, 255, 255, 0.3);
+  cursor: default;
 }
 
 .addBtn {

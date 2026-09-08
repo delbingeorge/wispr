@@ -3,18 +3,9 @@ import { useProjectStore } from "@/core/stores/project-store";
 import { storeFileInOpfs } from "@/core/storage/opfs-storage";
 import { generateId } from "@/core/utils/id-generator";
 import { generateAssetThumbnails } from "@/core/webcodecs/thumbnail-generator";
-import {
-  detectMediaKind,
-  probeMedia,
-  type MediaKind,
-} from "@/core/utils/media-detect";
+import { detectMediaKind, probeMedia } from "@/core/utils/media-detect";
 import type { Asset } from "@/core/types/projects";
-import { findFirstGap } from "@/core/utils/clip-placement";
 import { toast } from "@/features/ui/toast-store";
-
-function trackTypeForKind(kind: MediaKind): "video" | "audio" {
-  return kind === "audio" ? "audio" : "video";
-}
 
 async function importOneFile(file: File): Promise<string | null> {
   const kind = detectMediaKind(file);
@@ -30,7 +21,7 @@ async function importOneFile(file: File): Promise<string | null> {
 
     await storeFileInOpfs(file, opfsPath);
 
-    const { addAsset, addClip, project, clips } = useProjectStore.getState();
+    const { addAsset } = useProjectStore.getState();
 
     const asset: Asset = {
       id: assetId,
@@ -49,31 +40,6 @@ async function importOneFile(file: File): Promise<string | null> {
 
     addAsset(asset);
     generateAssetThumbnails(asset);
-
-    const targetType = trackTypeForKind(kind);
-    const track =
-      project.tracks.find((t) => t.type === targetType) ?? project.tracks[0];
-
-    if (!track) {
-      toast.err(`Imported ${file.name}`, "No tracks in this project");
-      return assetId;
-    }
-
-    const trackClips = Object.values(clips).filter(
-      (c) => c.trackId === track.id,
-    );
-    const startTime = findFirstGap(trackClips, info.duration);
-
-    addClip({
-      id: generateId(),
-      trackId: track.id,
-      assetId,
-      kind: "media",
-      startTime,
-      duration: info.duration,
-      inPoint: 0,
-      outPoint: info.duration,
-    });
 
     return assetId;
   } catch (err) {
@@ -98,7 +64,7 @@ export function useMediaImport() {
       if (imported.length > 0) {
         toast.ok(
           `Imported ${imported.length} file${imported.length > 1 ? "s" : ""}`,
-          "Stored in OPFS",
+          "Added to the asset library",
         );
       }
     } finally {

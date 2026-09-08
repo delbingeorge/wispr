@@ -22,7 +22,7 @@ export function AssetLibrary() {
   const initialFilter = useAssetLibraryStore((s) => s.initialFilter);
   const close = useAssetLibraryStore((s) => s.close);
   const assets = useProjectStore((s) => s.project.assets);
-  const { importFiles } = useMediaImport();
+  const { importFiles, busy } = useMediaImport();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [filter, setFilter] = useState<AssetLibraryFilter>(initialFilter);
@@ -80,7 +80,6 @@ export function AssetLibrary() {
   };
 
   const handleImportClick = () => {
-    close();
     fileInputRef.current?.click();
   };
 
@@ -151,8 +150,12 @@ export function AssetLibrary() {
         )}
 
         <div className={styles.foot}>
-          <button className={styles.importBtn} onClick={handleImportClick}>
-            Import media
+          <button
+            className={styles.importBtn}
+            onClick={handleImportClick}
+            disabled={busy}
+          >
+            {busy ? "Importing…" : "Import media"}
           </button>
           <button
             className={styles.addBtn}
