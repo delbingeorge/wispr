@@ -9,7 +9,7 @@ import { renderOverlays } from "./overlay-renderer";
 import styles from "./styles/preview-canvas.module.css";
 import { useOverlayInteraction } from "./use-overlay-interaction";
 import { useSelectionStore } from "@/core/stores/selection-store";
-import { getVideoDisplayRect } from "@/core/utils/video-frame";
+import { getPreviewFrameRect } from "@/core/utils/video-frame";
 
 export function PreviewCanvas() {
   const assetCount = useProjectStore((s) => s.project.assets.length);
@@ -19,7 +19,9 @@ export function PreviewCanvas() {
     [tracks],
   );
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const frameRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const audioRefsMap = useRef<Map<string, HTMLAudioElement>>(new Map());
@@ -51,34 +53,32 @@ export function PreviewCanvas() {
 
     const loop = () => {
       rafRef.current = requestAnimationFrame(loop);
-      if (!canvas.parentElement) return;
 
-      const containerRect = canvas.parentElement.getBoundingClientRect();
+      const container = containerRef.current;
+      if (!container) return;
+
+      const containerRect = container.getBoundingClientRect();
       const { project, clips } = useProjectStore.getState();
       const { currentTime } = usePlaybackStore.getState();
 
-      const videoRect = getVideoDisplayRect(
+      const frameRect = getPreviewFrameRect(
         containerRect.width,
         containerRect.height,
         project.resolution.width,
         project.resolution.height,
       );
 
-      const dpr = devicePixelRatio;
-      canvas.width = videoRect.width * dpr;
-      canvas.height = videoRect.height * dpr;
-      canvas.style.width = `${videoRect.width}px`;
-      canvas.style.height = `${videoRect.height}px`;
-      canvas.style.left = `${videoRect.x}px`;
-      canvas.style.top = `${videoRect.y}px`;
-
-      const video = videoRef.current;
-      if (video) {
-        video.style.width = `${videoRect.width}px`;
-        video.style.height = `${videoRect.height}px`;
-        video.style.left = `${videoRect.x}px`;
-        video.style.top = `${videoRect.y}px`;
+      const frame = frameRef.current;
+      if (frame) {
+        frame.style.width = `${frameRect.width}px`;
+        frame.style.height = `${frameRect.height}px`;
+        frame.style.left = `${frameRect.x}px`;
+        frame.style.top = `${frameRect.y}px`;
       }
+
+      const dpr = devicePixelRatio;
+      canvas.width = frameRect.width * dpr;
+      canvas.height = frameRect.height * dpr;
 
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
@@ -95,8 +95,8 @@ export function PreviewCanvas() {
         clips,
         overlayTrackClipIds,
         currentTime,
-        videoRect.width,
-        videoRect.height,
+        frameRect.width,
+        frameRect.height,
         project.resolution.width,
         project.resolution.height,
         selectedClipId,
@@ -113,8 +113,18 @@ export function PreviewCanvas() {
   }
 
   return (
-    <div className={styles.container}>
-      <video ref={videoRef} className={styles.video} />
+    <div ref={containerRef} className={styles.container}>
+      <div ref={frameRef} className={styles.frame}>
+        <video ref={videoRef} className={styles.video} />
+        <canvas
+          ref={canvasRef}
+          className={styles.overlay}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+        />
+      </div>
       {audioTrackIds.map((trackId) => (
         <audio
           key={trackId}
@@ -122,14 +132,6 @@ export function PreviewCanvas() {
           style={{ display: "none" }}
         />
       ))}
-      <canvas
-        ref={canvasRef}
-        className={styles.overlay}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-      />
     </div>
   );
 }

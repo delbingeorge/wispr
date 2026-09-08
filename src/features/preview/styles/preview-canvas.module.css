@@ -2,15 +2,27 @@
   position: relative;
   width: 100%;
   height: 100%;
-  background: #000;
+  background: #241f1f;
   overflow: hidden;
+}
+
+.frame {
+  position: absolute;
+  overflow: hidden;
+  background: #000;
 }
 
 .video {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
 .overlay {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
