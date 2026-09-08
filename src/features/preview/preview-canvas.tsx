@@ -21,12 +21,13 @@ export function PreviewCanvas() {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const frameRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef<number>(0);
   const audioRefsMap = useRef<Map<string, HTMLAudioElement>>(new Map());
 
-  usePlaybackEngine(videoRef, audioRefsMap);
+  usePlaybackEngine(videoRef, imageRef, audioRefsMap);
   useProjectDurationSync();
 
   const { handleMouseDown, handleMouseMove, handleMouseUp } =
@@ -116,6 +117,7 @@ export function PreviewCanvas() {
     <div ref={containerRef} className={styles.container}>
       <div ref={frameRef} className={styles.frame}>
         <video ref={videoRef} className={styles.video} />
+        <img ref={imageRef} className={styles.still} alt="" />
         <canvas
           ref={canvasRef}
           className={styles.overlay}

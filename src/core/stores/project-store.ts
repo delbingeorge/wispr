@@ -13,6 +13,7 @@ type ProjectState = {
   project: Project;
   clips: Record<string, Clip>;
   addAsset: (asset: Asset) => void;
+  removeAsset: (assetId: string) => void;
   addClip: (clip: Clip) => void;
   updateClip: (clipId: string, updates: Partial<Clip>) => void;
   splitClip: (clipId: string, splitTime: number) => void;
@@ -78,6 +79,32 @@ export const useProjectStore = create<ProjectState>((set) => ({
         updatedAt: Date.now(),
       },
     })),
+
+  removeAsset: (assetId) =>
+    set((state) => {
+      const removedClipIds = new Set(
+        Object.values(state.clips)
+          .filter((clip) => clip.kind === "media" && clip.assetId === assetId)
+          .map((clip) => clip.id),
+      );
+
+      const remainingClips = Object.fromEntries(
+        Object.entries(state.clips).filter(([id]) => !removedClipIds.has(id)),
+      );
+
+      return {
+        clips: remainingClips,
+        project: {
+          ...state.project,
+          assets: state.project.assets.filter((a) => a.id !== assetId),
+          tracks: state.project.tracks.map((track) => ({
+            ...track,
+            clips: track.clips.filter((id) => !removedClipIds.has(id)),
+          })),
+          updatedAt: Date.now(),
+        },
+      };
+    }),
 
   addClip: (clip) =>
     set((state) => ({

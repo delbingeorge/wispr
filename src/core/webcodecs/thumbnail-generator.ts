@@ -1,4 +1,5 @@
 import type { Asset } from "@/core/types/projects";
+import { readFileFromOpfs } from "@/core/storage/opfs-storage";
 import { gc } from "@/core/utils/logger";
 
 const FILMSTRIP_INTERVAL_SECONDS = 2;
@@ -92,9 +93,43 @@ export function getThumbnail(
   return nearest === null ? null : (entry.bitmaps.get(nearest) ?? null);
 }
 
+export function releaseAssetThumbnails(assetId: string) {
+  const entry = cache.get(assetId);
+  if (entry) {
+    entry.bitmaps.forEach((bitmap) => bitmap.close());
+    cache.delete(assetId);
+  }
+  requestedAssetIds.delete(assetId);
+}
+
+async function generateImageThumbnail(asset: Asset) {
+  const file = await readFileFromOpfs(asset.opfsPath);
+  const source = await createImageBitmap(file);
+
+  const canvas = new OffscreenCanvas(FILMSTRIP_WIDTH, FILMSTRIP_HEIGHT);
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  ctx.drawImage(source, 0, 0, FILMSTRIP_WIDTH, FILMSTRIP_HEIGHT);
+  source.close();
+
+  storeThumbnail(asset.id, 0, await createImageBitmap(canvas));
+  readyListeners.forEach((listener) => listener());
+}
+
 export function generateAssetThumbnails(asset: Asset) {
-  if (asset.type !== "video" || asset.duration <= 0) return;
   if (requestedAssetIds.has(asset.id)) return;
+
+  if (asset.type === "image") {
+    requestedAssetIds.add(asset.id);
+    generateImageThumbnail(asset).catch((error) => {
+      requestedAssetIds.delete(asset.id);
+      gc.error(`Thumbnail generation failed for ${asset.id}`, error);
+    });
+    return;
+  }
+
+  if (asset.type !== "video" || asset.duration <= 0) return;
   requestedAssetIds.add(asset.id);
 
   const count = Math.max(

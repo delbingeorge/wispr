@@ -3,29 +3,38 @@ import { usePlaybackStore } from "@/core/stores/playback-store";
 import { useProjectStore } from "@/core/stores/project-store";
 import { findActiveAudioClips, findActiveVideoClip } from "@/core/utils/clip-lookup";
 import { syncMediaElement } from "./media-element-sync";
+import { syncStillImage } from "./still-image-sync";
 
 function runSync(
   videoRef: React.RefObject<HTMLVideoElement | null>,
+  imageRef: React.RefObject<HTMLImageElement | null>,
   audioRefs: React.RefObject<Map<string, HTMLAudioElement>>,
 ) {
   const { currentTime, isPlaying, playbackRate } = usePlaybackStore.getState();
   const { project, clips } = useProjectStore.getState();
 
+  const activeVideo = findActiveVideoClip(clips, project.tracks, currentTime);
+  const activeVideoAsset = activeVideo
+    ? project.assets.find((a) => a.id === activeVideo.clip.assetId)
+    : undefined;
+  const showsStillImage = activeVideoAsset?.type === "image";
+
   const video = videoRef.current;
   if (video) {
-    const activeVideo = findActiveVideoClip(clips, project.tracks, currentTime);
-    const activeVideoAsset = activeVideo
-      ? project.assets.find((a) => a.id === activeVideo.clip.assetId)
-      : undefined;
     syncMediaElement(
       video,
       true,
-      activeVideo,
-      activeVideoAsset,
+      showsStillImage ? null : activeVideo,
+      showsStillImage ? undefined : activeVideoAsset,
       currentTime,
       isPlaying,
       playbackRate,
     );
+  }
+
+  const image = imageRef.current;
+  if (image) {
+    syncStillImage(image, showsStillImage ? activeVideoAsset : undefined);
   }
 
   const activeAudioClips = findActiveAudioClips(clips, project.tracks, currentTime);
@@ -50,6 +59,7 @@ function runSync(
 
 export function usePlaybackEngine(
   videoRef: React.RefObject<HTMLVideoElement | null>,
+  imageRef: React.RefObject<HTMLImageElement | null>,
   audioRefs: React.RefObject<Map<string, HTMLAudioElement>>,
 ) {
   const rafRef = useRef<number>(0);
@@ -78,7 +88,7 @@ export function usePlaybackEngine(
   };
 
   useEffect(() => {
-    runSync(videoRef, audioRefs);
+    runSync(videoRef, imageRef, audioRefs);
 
     const unsubPlayback = usePlaybackStore.subscribe((state, prev) => {
       if (
@@ -104,14 +114,14 @@ export function usePlaybackEngine(
         playStartTimelineTime.current = state.currentTime;
       }
 
-      runSync(videoRef, audioRefs);
+      runSync(videoRef, imageRef, audioRefs);
     });
 
     const unsubProject = useProjectStore.subscribe((state, prev) => {
       if (state.clips === prev.clips && state.project.tracks === prev.project.tracks) {
         return;
       }
-      runSync(videoRef, audioRefs);
+      runSync(videoRef, imageRef, audioRefs);
     });
 
     return () => {
@@ -125,6 +135,6 @@ export function usePlaybackEngine(
   }, []);
 
   useEffect(() => {
-    runSync(videoRef, audioRefs);
+    runSync(videoRef, imageRef, audioRefs);
   });
 }

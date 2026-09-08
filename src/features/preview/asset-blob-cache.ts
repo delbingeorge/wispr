@@ -29,6 +29,15 @@ export function getAssetBlobUrl(
   return request;
 }
 
+export function releaseAssetBlobUrl(assetId: string): void {
+  const url = resolvedUrls.get(assetId);
+  if (url) {
+    URL.revokeObjectURL(url);
+    resolvedUrls.delete(assetId);
+  }
+  pendingUrls.delete(assetId);
+}
+
 export function releaseAllAssetBlobUrls(): void {
   for (const url of resolvedUrls.values()) {
     URL.revokeObjectURL(url);

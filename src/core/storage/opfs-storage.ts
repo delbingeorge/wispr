@@ -15,3 +15,13 @@ export async function readFileFromOpfs(path: string): Promise<File> {
 
   return handle.getFile();
 }
+
+export async function removeFileFromOpfs(path: string): Promise<void> {
+  const root = await navigator.storage.getDirectory();
+
+  try {
+    await root.removeEntry(path);
+  } catch {
+    return;
+  }
+}

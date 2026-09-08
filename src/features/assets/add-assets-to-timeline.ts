@@ -19,7 +19,9 @@ export function addAssetsToTimeline(
 
     const wantType: TrackType = asset.type === "audio" ? "audio" : "video";
     const explicitTrack = targetTrackId
-      ? project.tracks.find((t) => t.id === targetTrackId)
+      ? project.tracks.find(
+          (t) => t.id === targetTrackId && t.type === wantType,
+        )
       : undefined;
     const existingTrack =
       explicitTrack ?? project.tracks.find((t) => t.type === wantType);
