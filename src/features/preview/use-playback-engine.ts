@@ -1,45 +1,60 @@
 import { useEffect, useRef } from "react";
 import { usePlaybackStore } from "@/core/stores/playback-store";
-import { gc } from "@/core/utils/logger";
+import { useProjectStore } from "@/core/stores/project-store";
+import { findActiveAudioClips, findActiveVideoClip } from "@/core/utils/clip-lookup";
+import { syncMediaElement } from "./media-element-sync";
+
+function runSync(
+  videoRef: React.RefObject<HTMLVideoElement | null>,
+  audioRefs: React.RefObject<Map<string, HTMLAudioElement>>,
+) {
+  const { currentTime, isPlaying, playbackRate } = usePlaybackStore.getState();
+  const { project, clips } = useProjectStore.getState();
+
+  const video = videoRef.current;
+  if (video) {
+    const activeVideo = findActiveVideoClip(clips, project.tracks, currentTime);
+    const activeVideoAsset = activeVideo
+      ? project.assets.find((a) => a.id === activeVideo.clip.assetId)
+      : undefined;
+    syncMediaElement(
+      video,
+      true,
+      activeVideo,
+      activeVideoAsset,
+      currentTime,
+      isPlaying,
+      playbackRate,
+    );
+  }
+
+  const activeAudioClips = findActiveAudioClips(clips, project.tracks, currentTime);
+
+  for (const [trackId, element] of audioRefs.current) {
+    const active =
+      activeAudioClips.find((entry) => entry.track.id === trackId) ?? null;
+    const asset = active
+      ? project.assets.find((a) => a.id === active.clip.assetId)
+      : undefined;
+    syncMediaElement(
+      element,
+      false,
+      active,
+      asset,
+      currentTime,
+      isPlaying,
+      playbackRate,
+    );
+  }
+}
 
 export function usePlaybackEngine(
   videoRef: React.RefObject<HTMLVideoElement | null>,
+  audioRefs: React.RefObject<Map<string, HTMLAudioElement>>,
 ) {
   const rafRef = useRef<number>(0);
   const playStartWallTime = useRef(0);
   const playStartTimelineTime = useRef(0);
-
-  useEffect(() => {
-    return usePlaybackStore.subscribe((state, prev) => {
-      const video = videoRef.current;
-      if (!video) return;
-
-      if (state.isPlaying && !prev.isPlaying) {
-        playStartWallTime.current = performance.now();
-        playStartTimelineTime.current = state.currentTime;
-        video.currentTime = state.currentTime;
-        video.playbackRate = state.playbackRate;
-        video.play();
-        startLoop();
-      }
-
-      if (!state.isPlaying && prev.isPlaying) {
-        video.pause();
-        cancelAnimationFrame(rafRef.current);
-      }
-
-      if (!state.isPlaying && state.currentTime !== prev.currentTime) {
-        video.currentTime = state.currentTime;
-      }
-
-      if (state.playbackRate !== prev.playbackRate) {
-        gc.log("cursor is insde - file use-playback-engine");
-        video.playbackRate = state.playbackRate;
-        playStartWallTime.current = performance.now();
-        playStartTimelineTime.current = state.currentTime;
-      }
-    });
-  }, []);
 
   const startLoop = () => {
     const tick = () => {
@@ -63,6 +78,53 @@ export function usePlaybackEngine(
   };
 
   useEffect(() => {
+    runSync(videoRef, audioRefs);
+
+    const unsubPlayback = usePlaybackStore.subscribe((state, prev) => {
+      if (
+        state.isPlaying === prev.isPlaying &&
+        state.currentTime === prev.currentTime &&
+        state.playbackRate === prev.playbackRate
+      ) {
+        return;
+      }
+
+      if (state.isPlaying && !prev.isPlaying) {
+        playStartWallTime.current = performance.now();
+        playStartTimelineTime.current = state.currentTime;
+        startLoop();
+      }
+
+      if (!state.isPlaying && prev.isPlaying) {
+        cancelAnimationFrame(rafRef.current);
+      }
+
+      if (state.playbackRate !== prev.playbackRate) {
+        playStartWallTime.current = performance.now();
+        playStartTimelineTime.current = state.currentTime;
+      }
+
+      runSync(videoRef, audioRefs);
+    });
+
+    const unsubProject = useProjectStore.subscribe((state, prev) => {
+      if (state.clips === prev.clips && state.project.tracks === prev.project.tracks) {
+        return;
+      }
+      runSync(videoRef, audioRefs);
+    });
+
+    return () => {
+      unsubPlayback();
+      unsubProject();
+    };
+  }, []);
+
+  useEffect(() => {
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
+
+  useEffect(() => {
+    runSync(videoRef, audioRefs);
+  });
 }
