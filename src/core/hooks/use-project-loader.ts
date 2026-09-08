@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useProjectStore } from "../stores/project-store";
 import { loadProject } from "../storage/project-storage";
+import { generateAssetThumbnails } from "../webcodecs/thumbnail-generator";
 import type { Project, Clip } from "../types/projects";
 
 async function verifyAssets(project: Project): Promise<string[]> {
@@ -43,6 +44,10 @@ export function useProjectLoader(projectId: string | null) {
           const missing = await verifyAssets(project);
           setMissingAssets(missing);
           setFound(true);
+
+          for (const asset of project.assets) {
+            if (!missing.includes(asset.id)) generateAssetThumbnails(asset);
+          }
         } else {
           setFound(false);
         }

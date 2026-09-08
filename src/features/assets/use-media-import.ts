@@ -1,14 +1,14 @@
 import { useCallback, useState } from "react";
 import { useProjectStore } from "@/core/stores/project-store";
-import { usePlaybackStore } from "@/core/stores/playback-store";
 import { storeFileInOpfs } from "@/core/storage/opfs-storage";
 import { generateId } from "@/core/utils/id-generator";
-import { generateThumbnails } from "@/core/webcodecs/thumbnail-generator";
+import { generateAssetThumbnails } from "@/core/webcodecs/thumbnail-generator";
 import {
   detectMediaKind,
   probeMedia,
   type MediaKind,
 } from "@/core/utils/media-detect";
+import type { Asset } from "@/core/types/projects";
 import { findFirstGap } from "@/core/utils/clip-placement";
 import { toast } from "@/features/ui/toast-store";
 
@@ -32,7 +32,7 @@ async function importOneFile(file: File): Promise<string | null> {
 
     const { addAsset, addClip, project, clips } = useProjectStore.getState();
 
-    addAsset({
+    const asset: Asset = {
       id: assetId,
       name: file.name.replace(/\.[^.]+$/, ""),
       fileName: file.name,
@@ -45,7 +45,10 @@ async function importOneFile(file: File): Promise<string | null> {
         height: info.height,
         codec: info.codec,
       },
-    });
+    };
+
+    addAsset(asset);
+    generateAssetThumbnails(asset);
 
     const targetType = trackTypeForKind(kind);
     const track =
@@ -71,27 +74,6 @@ async function importOneFile(file: File): Promise<string | null> {
       inPoint: 0,
       outPoint: info.duration,
     });
-
-    if (kind === "video") {
-      const thumbCount = Math.max(1, Math.ceil(info.duration / 2));
-      const timestamps = Array.from(
-        { length: thumbCount },
-        (_, i) => (i / thumbCount) * info.duration,
-      );
-      const dirtyTimeline = () => {
-        usePlaybackStore
-          .getState()
-          .setCurrentTime(usePlaybackStore.getState().currentTime);
-      };
-      generateThumbnails(
-        assetId,
-        opfsPath,
-        timestamps,
-        160,
-        90,
-        dirtyTimeline,
-      );
-    }
 
     return assetId;
   } catch (err) {

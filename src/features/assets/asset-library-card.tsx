@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import type { Asset } from "@/core/types/projects";
 import { readFileFromOpfs } from "@/core/storage/opfs-storage";
-import { generateThumbnails, getThumbnail } from "@/core/webcodecs/thumbnail-generator";
+import {
+  generateAssetThumbnails,
+  getThumbnail,
+  subscribeToThumbnails,
+} from "@/core/webcodecs/thumbnail-generator";
 import { formatTimecode } from "@/core/utils/time-format";
 import { Check } from "@/assets/icons";
 import styles from "./styles/asset-library-card.module.css";
@@ -52,19 +56,11 @@ export function AssetLibraryCard({
       if (bitmap) ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
     };
 
-    if (getThumbnail(asset.id, 0)) {
-      drawThumbnail();
-    } else {
-      generateThumbnails(
-        asset.id,
-        asset.opfsPath,
-        [0],
-        THUMB_WIDTH,
-        THUMB_HEIGHT,
-        drawThumbnail,
-      );
-    }
-  }, [asset.id, asset.type, asset.opfsPath]);
+    generateAssetThumbnails(asset);
+    drawThumbnail();
+
+    return subscribeToThumbnails(drawThumbnail);
+  }, [asset]);
 
   const metaText =
     asset.type === "audio"
