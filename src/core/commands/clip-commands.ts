@@ -1,6 +1,8 @@
 import type { Command } from "@/core/commands/types";
 import type { Clip, MediaClip } from "@/core/types/projects";
 import { useProjectStore } from "@/core/stores/project-store";
+import { useHistoryStore } from "@/core/stores/history-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
 
 export function createMoveCommand(
   clipId: string,
@@ -67,4 +69,30 @@ export function createSplitCommand(
       });
     },
   };
+}
+
+export function splitClipAtTime(clipId: string, time: number): boolean {
+  const clip = useProjectStore.getState().clips[clipId];
+  if (!clip || clip.kind !== "media") return false;
+  if (time <= clip.startTime || time >= clip.startTime + clip.duration) {
+    return false;
+  }
+
+  useHistoryStore.getState().dispatch(createSplitCommand(clipId, time, { ...clip }));
+  return true;
+}
+
+export function deleteSelectedClips() {
+  const { selectedClipIds } = useSelectionStore.getState();
+  if (selectedClipIds.size === 0) return;
+
+  const { clips } = useProjectStore.getState();
+  const { dispatch } = useHistoryStore.getState();
+
+  for (const clipId of selectedClipIds) {
+    const clip = clips[clipId];
+    if (clip) dispatch(createDeleteCommand(clipId, { ...clip }));
+  }
+
+  useSelectionStore.getState().deselectAll();
 }

@@ -2,6 +2,18 @@ import { useSelectionStore } from "@/core/stores/selection-store";
 import type { Tool } from "@/core/stores/selection-store";
 import { useProjectStore } from "@/core/stores/project-store";
 import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
+import { useHistoryStore } from "@/core/stores/history-store";
+import {
+  deleteSelectedClips,
+  splitClipAtTime,
+} from "@/core/commands/clip-commands";
+import { usePlaybackStore } from "@/core/stores/playback-store";
+import {
+  zoomIn,
+  zoomOut,
+  zoomToFit,
+} from "@/features/timeline/timeline-view-actions";
+import { toggleFullscreen } from "@/features/preview/fullscreen";
 import type { TrackType } from "@/core/types/projects";
 import { nextTrackLabel } from "@/core/utils/track-naming";
 import styles from "./styles/toolbar.module.css";
@@ -37,8 +49,72 @@ type MenuRow =
       label: string;
       icon?: ReactNode;
       keys?: string[];
+      disabled?: boolean;
       onSelect: () => void;
     };
+
+function editRows(
+  canUndo: boolean,
+  canRedo: boolean,
+  selectedCount: number,
+): MenuRow[] {
+  return [
+    {
+      kind: "action",
+      label: "Undo",
+      keys: ["⌘", "Z"],
+      disabled: !canUndo,
+      onSelect: () => useHistoryStore.getState().undo(),
+    },
+    {
+      kind: "action",
+      label: "Redo",
+      keys: ["⌘", "⇧", "Z"],
+      disabled: !canRedo,
+      onSelect: () => useHistoryStore.getState().redo(),
+    },
+    { kind: "sep" },
+    {
+      kind: "action",
+      label: "Split Clip",
+      keys: ["S"],
+      disabled: selectedCount !== 1,
+      onSelect: () => {
+        const clipId = [
+          ...useSelectionStore.getState().selectedClipIds,
+        ][0];
+        splitClipAtTime(clipId, usePlaybackStore.getState().currentTime);
+      },
+    },
+    {
+      kind: "action",
+      label: "Delete",
+      keys: ["⌫"],
+      disabled: selectedCount === 0,
+      onSelect: deleteSelectedClips,
+    },
+    { kind: "sep" },
+    {
+      kind: "action",
+      label: "Deselect All",
+      keys: ["esc"],
+      disabled: selectedCount === 0,
+      onSelect: () => useSelectionStore.getState().deselectAll(),
+    },
+  ];
+}
+
+const VIEW_ROWS: MenuRow[] = [
+  { kind: "action", label: "Zoom In", keys: ["+"], onSelect: zoomIn },
+  { kind: "action", label: "Zoom Out", keys: ["−"], onSelect: zoomOut },
+  { kind: "action", label: "Fit to View", keys: ["0"], onSelect: zoomToFit },
+  { kind: "sep" },
+  {
+    kind: "action",
+    label: "Full Screen",
+    onSelect: toggleFullscreen,
+  },
+];
 
 function fileRows(onImport: () => void, onExport: () => void): MenuRow[] {
   return [
@@ -150,6 +226,7 @@ function MenuBarDropdown({
               <button
                 key={row.label}
                 className={styles.insertRow}
+                disabled={row.disabled}
                 onClick={() => {
                   row.onSelect();
                   onSelectRow();
@@ -177,9 +254,13 @@ function MenuBarDropdown({
 }
 
 export function Toolbar({ onBack }: { onBack: () => void }) {
-  const activeTool = useSelectionStore((s) => s.activeTool);
   const [showExport, setShowExport] = useState(false);
-  const [openMenu, setOpenMenu] = useState<"file" | "insert" | null>(null);
+  const [openMenu, setOpenMenu] = useState<
+    "file" | "edit" | "view" | "insert" | null
+  >(null);
+  const undoStack = useHistoryStore((s) => s.undoStack);
+  const redoStack = useHistoryStore((s) => s.redoStack);
+  const selectedClipIds = useSelectionStore((s) => s.selectedClipIds);
   const { importFiles } = useMediaImport();
 
   const openFilePicker = useCallback(
@@ -231,12 +312,29 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
             onSelectRow={() => setOpenMenu(null)}
           />
 
-          <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
-            Edit
-          </button>
-          <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
-            View
-          </button>
+          <MenuBarDropdown
+            label="Edit"
+            rows={editRows(
+              undoStack.length > 0,
+              redoStack.length > 0,
+              selectedClipIds.size,
+            )}
+            open={openMenu === "edit"}
+            onToggle={() =>
+              setOpenMenu((current) => (current === "edit" ? null : "edit"))
+            }
+            onSelectRow={() => setOpenMenu(null)}
+          />
+
+          <MenuBarDropdown
+            label="View"
+            rows={VIEW_ROWS}
+            open={openMenu === "view"}
+            onToggle={() =>
+              setOpenMenu((current) => (current === "view" ? null : "view"))
+            }
+            onSelectRow={() => setOpenMenu(null)}
+          />
 
           <MenuBarDropdown
             label="Insert"
@@ -249,20 +347,8 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
             }
             onSelectRow={() => setOpenMenu(null)}
           />
-
-          <button className={`${styles.mbT} ${styles.mbTPlaceholder}`} disabled>
-            Help
-          </button>
         </nav>
 
-        <span className={styles.divider} />
-
-        <button
-          className={`${styles.btn} ${activeTool === "select" ? styles.active : ""}`}
-          onClick={() => setActiveTool("select")}
-        >
-          Select
-        </button>
 
       </div>
       {showExport && <ExportDialog onClose={() => setShowExport(false)} />}

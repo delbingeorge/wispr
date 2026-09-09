@@ -7,7 +7,6 @@ export type Toast = {
   variant: ToastVariant;
   message: string;
   detail?: string;
-  sticky?: boolean;
 };
 
 type ToastState = {
@@ -33,8 +32,6 @@ export const useToastStore = create<ToastState>((set) => ({
 export const toast = {
   ok: (message: string, detail?: string) =>
     useToastStore.getState().push({ variant: "ok", message, detail }),
-  err: (message: string, detail?: string, sticky = true) =>
-    useToastStore
-      .getState()
-      .push({ variant: "err", message, detail, sticky }),
+  err: (message: string, detail?: string) =>
+    useToastStore.getState().push({ variant: "err", message, detail }),
 };

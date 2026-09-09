@@ -1,13 +1,13 @@
 import { useEffect } from "react";
 import { useSelectionStore } from "@/core/stores/selection-store";
 import { usePlaybackStore } from "@/core/stores/playback-store";
-import { useProjectStore } from "@/core/stores/project-store";
 import { useHistoryStore } from "@/core/stores/history-store";
 import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
 import {
-  createSplitCommand,
-  createDeleteCommand,
+  deleteSelectedClips,
+  splitClipAtTime,
 } from "@/core/commands/clip-commands";
+import { zoomIn, zoomOut, zoomToFit } from "./timeline-view-actions";
 
 export function useTimelineKeyboard() {
   useEffect(() => {
@@ -17,7 +17,7 @@ export function useTimelineKeyboard() {
 
       const { selectedClipIds } = useSelectionStore.getState();
 
-      const { dispatch, undo, redo } = useHistoryStore.getState();
+      const { undo, redo } = useHistoryStore.getState();
 
       if ((e.ctrlKey || e.metaKey) && e.key === "z" && !e.shiftKey) {
         e.preventDefault();
@@ -65,32 +65,27 @@ export function useTimelineKeyboard() {
 
       if (e.key === "s" && !e.ctrlKey && !e.metaKey) {
         if (selectedClipIds.size !== 1) return;
-        const clipId = [...selectedClipIds][0];
-        const clip = useProjectStore.getState().clips[clipId];
-
-        if (!clip || clip.kind !== "media") return;
-
-        const currentTime = usePlaybackStore.getState().currentTime;
-        if (
-          currentTime <= clip.startTime ||
-          currentTime >= clip.startTime + clip.duration
-        )
-          return;
-        dispatch(createSplitCommand(clipId, currentTime, { ...clip }));
+        splitClipAtTime(
+          [...selectedClipIds][0],
+          usePlaybackStore.getState().currentTime,
+        );
       }
 
       if (e.key === "Delete" || e.key === "Backspace") {
-        if (selectedClipIds.size === 0) return;
-
-        const { clips } = useProjectStore.getState();
-        for (const clipId of selectedClipIds) {
-          const clip = clips[clipId];
-          if (clip) {
-            dispatch(createDeleteCommand(clipId, { ...clip }));
-          }
-        }
-        useSelectionStore.getState().deselectAll();
+        deleteSelectedClips();
       }
+
+      if (e.key === "+" || e.key === "=") {
+        e.preventDefault();
+        zoomIn();
+      }
+
+      if (e.key === "-" || e.key === "_") {
+        e.preventDefault();
+        zoomOut();
+      }
+
+      if (e.key === "0") zoomToFit();
     };
 
     window.addEventListener("keydown", handleKeyDown);

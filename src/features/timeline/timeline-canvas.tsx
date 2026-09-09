@@ -19,6 +19,7 @@ import { useHistoryStore } from "@/core/stores/history-store";
 import {
   createMoveCommand,
   createTrimCommand,
+  splitClipAtTime,
 } from "@/core/commands/clip-commands";
 
 const renderer = new TimelineRenderer();
@@ -150,6 +151,11 @@ export function TimelineCanvas({
       usePlaybackStore.getState().setCurrentTime(result.time);
       useSelectionStore.getState().deselectAll();
     } else if (result.type === "clip") {
+      if (useSelectionStore.getState().activeTool === "split") {
+        splitClipAtTime(result.clipId, pixelToTime(mouseX, zoom, scrollX));
+        return;
+      }
+
       useSelectionStore.getState().selectClip(result.clipId);
 
       const clip = clips[result.clipId];
