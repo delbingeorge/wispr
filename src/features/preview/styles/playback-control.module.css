@@ -32,6 +32,57 @@
   justify-content: flex-end;
 }
 
+.zoom {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+}
+
+.zoomBtn {
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.zoomBtn svg {
+  width: 11px;
+  height: 11px;
+}
+
+.zoomBtn:hover {
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--ink);
+}
+
+.zoomValue {
+  min-width: 38px;
+  text-align: center;
+  cursor: pointer;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--ink-2);
+  letter-spacing: -0.2px;
+}
+
+.zoomValue:hover {
+  color: var(--color-accent);
+}
+
+.trackDivider {
+  width: 1px;
+  height: 22px;
+  align-self: center;
+  margin: 0 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
 .timeBadge {
   background: var(--color-accent);
   color: #000;
@@ -51,12 +102,24 @@
   display: grid;
   place-items: center;
   flex: none;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.075);
   background: transparent;
   color: var(--ink);
   cursor: pointer;
-  padding: 5px;
+  padding: 0;
+}
+
+.btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.btnPlay svg {
+  width: 19px;
+  height: 19px;
 }
 
 .btn:hover {

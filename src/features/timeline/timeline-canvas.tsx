@@ -75,6 +75,7 @@ export function TimelineCanvas({
       canvas.width = rect.width * devicePixelRatio;
       canvas.height = rect.height * devicePixelRatio;
       ctx.scale(devicePixelRatio, devicePixelRatio);
+      useTimelineStore.getState().setViewportWidth(rect.width);
       dirtyRef.current = true;
     };
 
