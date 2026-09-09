@@ -2,19 +2,22 @@
 
 import { useEffect, useState } from "react";
 import { usePlaybackStore } from "@/core/stores/playback-store";
-import { useProjectStore } from "@/core/stores/project-store";
-import { DEFAULT_ZOOM, useTimelineStore } from "@/core/stores/timeline-store";
+import { useSelectionStore } from "@/core/stores/selection-store";
+import { useTimelineStore } from "@/core/stores/timeline-store";
 import {
-  clampZoom,
-  getFitZoom,
-  getTimelineDuration,
-} from "@/features/timeline/timeline-extent";
+  resetTimelineView,
+  zoomIn,
+  zoomOut,
+  zoomToFit,
+} from "@/features/timeline/timeline-view-actions";
+import { toggleFullscreen } from "./fullscreen";
 import { useHistoryStore } from "@/core/stores/history-store";
 import { formatTimecode } from "@/core/utils/time-format";
-import { toast } from "@/features/ui/toast-store";
 import styles from "./styles/playback-control.module.css";
 import {
+  Blade,
   Collapse,
+  Cursor,
   Expand,
   FastForward,
   Minus,
@@ -28,7 +31,6 @@ import {
 } from "@/assets/icons";
 
 const RATES = [0.25, 0.5, 1, 1.5, 2];
-const ZOOM_STEP = 1.5;
 
 export function PlaybackControls() {
   const currentTime = usePlaybackStore((s) => s.currentTime);
@@ -36,6 +38,7 @@ export function PlaybackControls() {
   const duration = usePlaybackStore((s) => s.duration);
   const playbackRate = usePlaybackStore((s) => s.playbackRate);
   const zoom = useTimelineStore((s) => s.zoom);
+  const activeTool = useSelectionStore((s) => s.activeTool);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -77,40 +80,25 @@ export function PlaybackControls() {
   const handleUndo = () => useHistoryStore.getState().undo();
   const handleRedo = () => useHistoryStore.getState().redo();
 
-  const handleZoom = (factor: number) => {
-    const { zoom: current, setZoom } = useTimelineStore.getState();
-    setZoom(clampZoom(current * factor));
-  };
-
-  const handleZoomToFit = () => {
-    const { viewportWidth, setZoom, setScrollX } = useTimelineStore.getState();
-    const { project, clips } = useProjectStore.getState();
-
-    setZoom(getFitZoom(getTimelineDuration(clips, project.tracks), viewportWidth));
-    setScrollX(0);
-  };
-
-  const handleResetView = () => {
-    const { setZoom, setScrollX, setScrollY } = useTimelineStore.getState();
-    setZoom(DEFAULT_ZOOM);
-    setScrollX(0);
-    setScrollY(0);
-  };
-
-  const handleToggleFullscreen = () => {
-    if (document.fullscreenElement) {
-      void document.exitFullscreen();
-      return;
-    }
-    void document.documentElement.requestFullscreen().catch(() => {
-      toast.err("Full screen unavailable", "The browser refused the request");
-    });
-  };
-
   return (
     <div className={styles.controls}>
       <div className={styles.left}>
-        <span className={styles.timeBadge}>{formatTimecode(currentTime)}</span>
+        <div className={styles.rail} role="toolbar" aria-label="Tools">
+          <button
+            className={`${styles.tool} ${activeTool === "select" ? styles.toolActive : ""}`}
+            onClick={() => useSelectionStore.getState().setActiveTool("select")}
+            title="Selection"
+          >
+            <Cursor />
+          </button>
+          <button
+            className={`${styles.tool} ${activeTool === "split" ? styles.toolActive : ""}`}
+            onClick={() => useSelectionStore.getState().setActiveTool("split")}
+            title="Split — click a clip to cut it"
+          >
+            <Blade />
+          </button>
+        </div>
       </div>
 
       <div className={styles.center}>
@@ -173,21 +161,21 @@ export function PlaybackControls() {
         <span className={styles.zoom}>
           <button
             className={styles.zoomBtn}
-            onClick={() => handleZoom(1 / ZOOM_STEP)}
+            onClick={zoomOut}
             title="Zoom out"
           >
             <Minus />
           </button>
           <span
             className={styles.zoomValue}
-            onClick={handleZoomToFit}
+            onClick={zoomToFit}
             title="Fit timeline to view"
           >
             {Math.round(zoom)}%
           </span>
           <button
             className={styles.zoomBtn}
-            onClick={() => handleZoom(ZOOM_STEP)}
+            onClick={zoomIn}
             title="Zoom in"
           >
             <Plus />
@@ -198,14 +186,14 @@ export function PlaybackControls() {
 
         <button
           className={styles.btn}
-          onClick={handleResetView}
+          onClick={resetTimelineView}
           title="Reset timeline view"
         >
           <Reset />
         </button>
         <button
           className={styles.btn}
-          onClick={handleToggleFullscreen}
+          onClick={toggleFullscreen}
           title={isFullscreen ? "Exit full screen" : "Full screen"}
         >
           {isFullscreen ? <Collapse /> : <Expand />}

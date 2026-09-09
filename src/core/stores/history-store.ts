@@ -37,7 +37,7 @@ export const useHistoryStore = create<HistoryState>((set, get) => ({
     const { redoStack } = get();
     if (redoStack.length === 0) return;
     const command = redoStack[redoStack.length - 1];
-    command.undo();
+    command.execute();
 
     set((state) => ({
       redoStack: state.redoStack.slice(0, -1),

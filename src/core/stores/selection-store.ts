@@ -1,6 +1,13 @@
 import { create } from "zustand";
 
-type Tool = "select" | "text" | "rectangle" | "ellipse" | "line" | "arrow";
+type Tool =
+  | "select"
+  | "split"
+  | "text"
+  | "rectangle"
+  | "ellipse"
+  | "line"
+  | "arrow";
 
 type SelectionState = {
   selectedClipIds: Set<string>;

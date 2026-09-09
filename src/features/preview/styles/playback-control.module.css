@@ -83,14 +83,46 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
-.timeBadge {
-  background: var(--color-accent);
-  color: #000;
-  font-size: 12px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 10px;
+.rail {
+  display: flex;
+  align-items: center;
+  gap: 7.8px;
 }
+
+.tool {
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  background: transparent;
+  color: var(--ink);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  flex: none;
+}
+
+.tool svg {
+  width: 18px;
+  height: 18px;
+}
+
+.tool:hover {
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.toolActive,
+.toolActive:hover {
+  background: var(--red);
+  border-color: transparent;
+  color: #fff;
+}
+
+.toolActive:hover {
+  background: #ff6165;
+}
+
 
 .timeDisplay {
   font-size: 12px;
