@@ -117,6 +117,25 @@
   text-align: left;
 }
 
+.key {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  display: grid;
+  place-items: center;
+  font-family: var(--sans);
+  font-size: 9.5px;
+  color: var(--ink-2);
+  flex: none;
+  margin-left: 4px;
+}
+
+.keyCmd {
+  font-size: 11px;
+  padding-bottom: 1px;
+}
+
 .insertSep {
   height: 1px;
   margin: 5px 9px;

@@ -5,8 +5,10 @@ import { useAssetLibraryStore } from "@/core/stores/asset-library-store";
 import type { TrackType } from "@/core/types/projects";
 import { nextTrackLabel } from "@/core/utils/track-naming";
 import styles from "./styles/toolbar.module.css";
-import { useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { ExportDialog } from "../export/export-dialog";
+import { useMediaImport } from "../assets/use-media-import";
+import { pickMediaFiles } from "../assets/pick-media-files";
 import {
   Logo,
   Type,
@@ -30,15 +32,37 @@ function insertTrack(type: TrackType) {
 
 type MenuRow =
   | { kind: "sep" }
-  | { kind: "action"; label: string; icon?: ReactNode; onSelect: () => void };
+  | {
+      kind: "action";
+      label: string;
+      icon?: ReactNode;
+      keys?: string[];
+      onSelect: () => void;
+    };
 
-const FILE_ROWS: MenuRow[] = [
-  {
-    kind: "action",
-    label: "Asset Library",
-    onSelect: () => useAssetLibraryStore.getState().open(),
-  },
-];
+function fileRows(onImport: () => void, onExport: () => void): MenuRow[] {
+  return [
+    {
+      kind: "action",
+      label: "Import Media…",
+      keys: ["⌘", "I"],
+      onSelect: onImport,
+    },
+    {
+      kind: "action",
+      label: "Asset Library",
+      keys: ["⌘", "L"],
+      onSelect: () => useAssetLibraryStore.getState().open(),
+    },
+    { kind: "sep" },
+    {
+      kind: "action",
+      label: "Export Video…",
+      keys: ["⌘", "E"],
+      onSelect: onExport,
+    },
+  ];
+}
 
 const INSERT_ROWS: MenuRow[] = [
   {
@@ -135,6 +159,14 @@ function MenuBarDropdown({
                   <span className={styles.insertIcon}>{row.icon}</span>
                 )}
                 <span className={styles.insertLabel}>{row.label}</span>
+                {row.keys?.map((key) => (
+                  <kbd
+                    key={key}
+                    className={`${styles.key} ${key === "⌘" ? styles.keyCmd : ""}`}
+                  >
+                    {key}
+                  </kbd>
+                ))}
               </button>
             ),
           )}
@@ -148,6 +180,31 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
   const activeTool = useSelectionStore((s) => s.activeTool);
   const [showExport, setShowExport] = useState(false);
   const [openMenu, setOpenMenu] = useState<"file" | "insert" | null>(null);
+  const { importFiles } = useMediaImport();
+
+  const openFilePicker = useCallback(
+    () => pickMediaFiles((files) => void importFiles(files)),
+    [importFiles],
+  );
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (!e.metaKey && !e.ctrlKey) return;
+
+      if (e.key === "i") {
+        e.preventDefault();
+        openFilePicker();
+      }
+
+      if (e.key === "e") {
+        e.preventDefault();
+        setShowExport(true);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [openFilePicker]);
 
   useEffect(() => {
     if (!openMenu) return;
@@ -166,7 +223,7 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
         <nav className={styles.menubar} aria-label="Main menu">
           <MenuBarDropdown
             label="File"
-            rows={FILE_ROWS}
+            rows={fileRows(openFilePicker, () => setShowExport(true))}
             open={openMenu === "file"}
             onToggle={() =>
               setOpenMenu((current) => (current === "file" ? null : "file"))
@@ -207,12 +264,6 @@ export function Toolbar({ onBack }: { onBack: () => void }) {
           Select
         </button>
 
-        <button
-          className={styles.exportBtn}
-          onClick={() => setShowExport(true)}
-        >
-          Export
-        </button>
       </div>
       {showExport && <ExportDialog onClose={() => setShowExport(false)} />}
     </>
