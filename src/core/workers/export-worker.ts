@@ -16,6 +16,7 @@ type ExportMessage = {
   tracks: Track[];
   assets: {
     id: string;
+    type: string;
     opfsPath: string;
     duration: number;
     metadata: { width: number; height: number; codec: string };
@@ -48,6 +49,36 @@ function extractDescription(mp4boxFile: ISOFile, trackId: number): Uint8Array {
   }
 
   throw new Error("No codec description found");
+}
+
+async function loadAssetImage(opfsPath: string): Promise<ImageBitmap> {
+  const root = await navigator.storage.getDirectory();
+  const handle = await root.getFileHandle(opfsPath);
+  const file = await handle.getFile();
+
+  return createImageBitmap(file);
+}
+
+function drawContained(
+  ctx: OffscreenCanvasRenderingContext2D,
+  source: ImageBitmap,
+  frameWidth: number,
+  frameHeight: number,
+) {
+  const scale = Math.min(
+    frameWidth / source.width,
+    frameHeight / source.height,
+  );
+  const width = source.width * scale;
+  const height = source.height * scale;
+
+  ctx.drawImage(
+    source,
+    (frameWidth - width) / 2,
+    (frameHeight - height) / 2,
+    width,
+    height,
+  );
 }
 
 async function loadAssetSamples(opfsPath: string): Promise<{
@@ -334,12 +365,19 @@ async function runExport(data: ExportMessage) {
   const ctx = canvas.getContext("2d")!;
 
   const assetDataMap = new Map<string, AssetData>();
+  const assetImageMap = new Map<string, ImageBitmap>();
 
   self.postMessage({ type: "progress", percent: 0, phase: "loading" });
 
   for (const asset of assets) {
-    const assetData = await loadAssetSamples(asset.opfsPath);
-    assetDataMap.set(asset.id, assetData);
+    if (asset.type === "image") {
+      assetImageMap.set(asset.id, await loadAssetImage(asset.opfsPath));
+      continue;
+    }
+
+    if (asset.type !== "video") continue;
+
+    assetDataMap.set(asset.id, await loadAssetSamples(asset.opfsPath));
   }
 
   const encodedChunks: {
@@ -393,6 +431,11 @@ async function runExport(data: ExportMessage) {
     const active = findActiveVideoClip(clips, tracks, currentTime);
 
     if (active) {
+      const image = assetImageMap.get(active.clip.assetId);
+      if (image) {
+        drawContained(ctx, image, resolution.width, resolution.height);
+      }
+
       const assetData = assetDataMap.get(active.clip.assetId);
       if (assetData) {
         const sourceTime =
@@ -429,6 +472,8 @@ const frame = new VideoFrame(canvas, { timestamp: timestampMicro });
 
   await encoder.flush();
   encoder.close();
+
+  assetImageMap.forEach((image) => image.close());
 
   self.postMessage({ type: "progress", percent: 95, phase: "muxing" });
 

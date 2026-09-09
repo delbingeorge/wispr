@@ -22,6 +22,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }) {
 
     const assets = project.assets.map((a) => ({
       id: a.id,
+      type: a.type,
       opfsPath: a.opfsPath,
       duration: a.duration,
       metadata: a.metadata,
