@@ -3,7 +3,11 @@ import type { RefObject } from "react";
 import { useTimelineStore } from "@/core/stores/timeline-store";
 import { useProjectStore } from "@/core/stores/project-store";
 import { RULER_HEIGHT, getMaxScrollY } from "./track-layout";
-import { getMaxScrollX, getTimelineDuration } from "./timeline-extent";
+import {
+  clampZoom,
+  getMaxScrollX,
+  getTimelineDuration,
+} from "./timeline-extent";
 
 export function useTimelineWheel(
   targetRef: RefObject<HTMLElement | null>,
@@ -31,10 +35,7 @@ export function useTimelineWheel(
 
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
-        const newZoom = Math.max(
-          10,
-          Math.min(1000, zoom * (1 - e.deltaY * 0.005)),
-        );
+        const newZoom = clampZoom(zoom * (1 - e.deltaY * 0.005));
         const mouseX = e.clientX - rect.left;
         const timeAtMouse = (mouseX + scrollX) / zoom;
         setZoom(newZoom);
